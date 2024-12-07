@@ -135,7 +135,37 @@ void bubble_sort(int *arr, const size_t arr_size)
     }
 }
 
+int my_abs(int a)
+{
+    if (a < 0)
+    {
+        return -a;
+    }
+    else
+    {
+        return a;
+    }
+}
+
 int main()
 {
-    printf("Hello world");
+
+    int *nums_left;
+    int *nums_right;
+
+    size_t arr_size = read_inputs("../../inputs/day1.txt", &nums_left, &nums_right, INIT_BUF_SIZE);
+
+    bubble_sort(nums_left, arr_size);
+    bubble_sort(nums_right, arr_size);
+
+    int total_distance = 0;
+
+    for (int i = 0; i < arr_size; i++)
+    {
+        int distance = nums_left[i] - nums_right[i];
+        total_distance += my_abs(distance);
+    }
+
+    printf("Day 1. Total distance: %d\n", total_distance);
+    return 0;
 }
