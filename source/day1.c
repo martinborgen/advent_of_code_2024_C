@@ -173,6 +173,18 @@ int binary_search(const int *arr, const size_t arr_len, const int key)
     return -1; // unlikely exit point
 }
 
+int count_occurances(const int *arr, const size_t arr_len, const int key)
+{
+    int count = 0;
+    int i = binary_search(arr, arr_len, key);
+    while (i < arr_len && arr[i] == key)
+    {
+        count++;
+        i++;
+    }
+    return count;
+}
+
 int my_abs(int a)
 {
     if (a < 0)
