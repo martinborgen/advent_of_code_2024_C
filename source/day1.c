@@ -161,7 +161,7 @@ int binary_search(const int *arr, const size_t arr_len, const int key)
         {
             l = m + 1;
         }
-        else if (l == r && key != arr[key])
+        else if (l == r && key != arr[l])
         {
             return -1; // key does not exist
         }
