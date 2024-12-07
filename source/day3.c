@@ -19,34 +19,44 @@ int mul_parser(char *str, size_t str_len)
     bool comma = false;
 
     // start is after 'mul(' (4 chars), then two maximum three digit numbers, a comma and final bracket are max to parse
-    for (int i = 4; i < 12; i++)
+    int i = 4;
+    for (i; i < 8; i++)
     {
         char c = str[i];
-        if (c == ',' && !rightbracket)
+        if (c <= '9' && c >= '0')
+        {
+            numA[numA_digits] = c;
+            numA_digits++;
+        }
+        else if (c == ',')
         {
             comma = true;
+            break;
         }
-        else if (c == ')' && comma)
+        else
+        {
+            *parsed = 0;
+            return i;
+        }
+    }
+
+    for (i++; i < 12; i++)
+    {
+        char c = str[i];
+        if (c <= '9' && c >= '0')
+        {
+            numB[numB_digits] = c;
+            numB_digits++;
+        }
+        else if (c == ')')
         {
             rightbracket = true;
             break;
         }
-        else if (c >= '0' && c <= '9')
-        {
-            if (!comma)
-            {
-                numA[numA_digits] = c;
-                numA_digits++;
-            }
-            else
-            {
-                numB[numB_digits] = c;
-                numB_digits++;
-            }
-        }
         else
         {
-            return 0;
+            *parsed = 0;
+            return i;
         }
     }
 
@@ -61,7 +71,8 @@ int mul_parser(char *str, size_t str_len)
     int A = atoi(numA);
     int B = atoi(numB);
 
-    return A * B;
+    *parsed = A * B;
+    return numA_digits + numB_digits + 2;
 }
 
 int main()
