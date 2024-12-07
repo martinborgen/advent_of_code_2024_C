@@ -216,11 +216,21 @@ int main()
         total_distance += my_abs(distance);
     }
 
-    printf("Day 1. Total distance: %d\n", total_distance);
+    printf("Day 1, part 1. Total distance: %d\n", total_distance);
 
     // Part 2
+    int similarity = 0;
 
-        free(nums_left);
+    for (int i = 0; i < arr_size; i++)
+    {
+        int num = nums_left[i];
+        int count = count_occurances(nums_right, arr_size, num);
+        similarity += num * count;
+    }
+
+    printf("Day 1, part 2. Total similarity: %d\n", similarity);
+
+    free(nums_left);
     free(nums_right);
     return 0;
 }
