@@ -8,9 +8,15 @@
 #define INIT_BUF_SIZE 128
 
 /*
+    Part 1:
     A safe reports have all it's number (levels) either increasing or decreasing.
     Any two adjacent levels differ by at least one and at most three.
+
+    Part 2:
+    The Problem Dampener is a reactor-mounted module that lets the reactor safety systems tolerate
+    a single bad level in what would otherwise be a safe report. It's like the bad level never happened!
  */
+
 bool check_report_safety(char *report, const size_t report_len)
 {
     bool increasing_set = false;
@@ -112,10 +118,41 @@ int main()
 
     while (fgets(line_buffer, READ_LINE_SIZE, input_ptr))
     {
-        // printf("%s", line_buffer);
-        if (check_report_safety(line_buffer, READ_LINE_SIZE))
+        char report_cpy[READ_LINE_SIZE];
+        strncpy(report_cpy, line_buffer, READ_LINE_SIZE);
+        if (check_report_safety(report_cpy, READ_LINE_SIZE))
         {
             safe_count++;
+        }
+        else
+        {
+            // part 2: make permutations of the report with a single level removed
+
+            int levels = 0;
+            for (int i = 0; i < strnlen(line_buffer, READ_LINE_SIZE); i++)
+            {
+                if (line_buffer[i] == ' ')
+                {
+                    levels++;
+                }
+            }
+
+            for (int i = 0; i <= levels; i++)
+            {
+                strncpy(report_cpy, line_buffer, READ_LINE_SIZE);
+                remove_level(report_cpy, i);
+                // printf("%s", report_cpy);
+                if (check_report_safety(report_cpy, READ_LINE_SIZE))
+                {
+                    // printf(" SAFE!\n\n");
+                    safe_count++;
+                    break;
+                }
+                // else
+                // {
+                //     printf("UNSAFE!\n\n");
+                // }
+            }
         }
     }
 
