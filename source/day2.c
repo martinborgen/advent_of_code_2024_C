@@ -67,6 +67,8 @@ bool check_report_safety(char *report, const size_t report_len)
     return true;
 }
 
+// remove_level() removes the number given by `skip` (zero-indexed)
+// For instance, `"1 22 33"` with `skip == 1` would return `"1 33"`
 void remove_level(char *report, const int skip)
 {
     if (skip < 0)
@@ -127,7 +129,6 @@ int main()
         else
         {
             // part 2: make permutations of the report with a single level removed
-
             int levels = 0;
             for (int i = 0; i < strnlen(line_buffer, READ_LINE_SIZE); i++)
             {
@@ -141,20 +142,15 @@ int main()
             {
                 strncpy(report_cpy, line_buffer, READ_LINE_SIZE);
                 remove_level(report_cpy, i);
-                // printf("%s", report_cpy);
                 if (check_report_safety(report_cpy, READ_LINE_SIZE))
                 {
-                    // printf(" SAFE!\n\n");
+
                     safe_count++;
                     break;
                 }
-                // else
-                // {
-                //     printf("UNSAFE!\n\n");
-                // }
             }
         }
     }
 
-    printf("Day 2 part 1: safe count: %d\n", safe_count);
+    printf("Day 2 part 2: safe count: %d\n", safe_count);
 }
