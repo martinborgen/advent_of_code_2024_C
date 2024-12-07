@@ -25,6 +25,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #define INIT_BUF_SIZE 128
 #define READ_LINE_SIZE 128
@@ -101,6 +102,37 @@ size_t read_inputs(const char *filename, int **dst1, int **dst2, const size_t n)
 
     fclose(fptr);
     return arr_size;
+}
+
+void bubble_sort(int *arr, const size_t arr_size)
+{
+    if (arr_size < 2)
+    {
+        return;
+    }
+
+    bool is_sorted = false;
+    bool has_bubbled;
+
+    while (!is_sorted)
+    {
+        has_bubbled = false;
+        for (int i = 1; i < arr_size; i++)
+        {
+            if (arr[i - 1] > arr[i])
+            {
+                int tmp = arr[i];
+                arr[i] = arr[i - 1];
+                arr[i - 1] = tmp;
+                has_bubbled = true;
+            }
+        }
+
+        if (!has_bubbled)
+        {
+            is_sorted = true;
+        }
+    }
 }
 
 int main()
