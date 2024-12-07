@@ -63,7 +63,7 @@ bool check_report_safety(char *report, const size_t report_len)
 
 void remove_level(char *report, const int skip)
 {
-    if (skip <= 0)
+    if (skip < 0)
     {
         return;
     }
@@ -75,7 +75,7 @@ void remove_level(char *report, const int skip)
 
     for (int i = 0; i < len; i++)
     {
-        if (report[i] == ' ')
+        if (report[i] == ' ' || report[i] == '\n')
         {
             nums_count++;
             last_space_idx = space_idx;
