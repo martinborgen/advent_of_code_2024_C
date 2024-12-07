@@ -135,6 +135,44 @@ void bubble_sort(int *arr, const size_t arr_size)
     }
 }
 
+int binary_search(const int *arr, const size_t arr_len, const int key)
+{
+    int l = 0;
+    int r = arr_len - 1;
+    int m;
+    int m_val;
+
+    while (l <= r)
+    {
+        m = l + (r - l) / 2;
+        m_val = arr[m];
+        if (key == m_val)
+        {
+            for (int i = m; i >= 0; i--)
+            {
+                if (arr[i] != key)
+                {
+                    return i + 1;
+                }
+            }
+            return 0; // edge case of running to beginning of arr
+        }
+        if (key > m_val)
+        {
+            l = m + 1;
+        }
+        else if (l == r && key != arr[key])
+        {
+            return -1; // key does not exist
+        }
+        else
+        {
+            r = m;
+        }
+    }
+    return -1; // unlikely exit point
+}
+
 int my_abs(int a)
 {
     if (a < 0)
@@ -149,7 +187,7 @@ int my_abs(int a)
 
 int main()
 {
-
+    // Part 1
     int *nums_left;
     int *nums_right;
 
@@ -167,5 +205,10 @@ int main()
     }
 
     printf("Day 1. Total distance: %d\n", total_distance);
+
+    // Part 2
+
+        free(nums_left);
+    free(nums_right);
     return 0;
 }
