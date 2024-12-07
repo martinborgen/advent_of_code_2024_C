@@ -29,7 +29,7 @@
 #define INIT_BUF_SIZE 128
 #define READ_LINE_SIZE 128
 
-int read_inputs(const char *filename, int **dst1, int **dst2, const size_t n)
+size_t read_inputs(const char *filename, int **dst1, int **dst2, const size_t n)
 {
     FILE *fptr;
     int rows_read = 0;
@@ -40,8 +40,14 @@ int read_inputs(const char *filename, int **dst1, int **dst2, const size_t n)
     *dst1 = malloc(sizeof(int) * INIT_BUF_SIZE);
     *dst2 = malloc(sizeof(int) * INIT_BUF_SIZE);
 
-    if (fptr == NULL || dst1 == NULL || dst2 == NULL)
+    if (fptr == NULL)
     {
+        printf("Error reading file!\n");
+        return -1;
+    }
+    else if (dst1 == NULL || dst2 == NULL)
+    {
+        printf("Error malloc returned NULLptrs!\n");
         return -1;
     }
 
@@ -54,6 +60,7 @@ int read_inputs(const char *filename, int **dst1, int **dst2, const size_t n)
 
             if (tmp1 == NULL || tmp2 == NULL)
             {
+                printf("Error realloc returned NULLptrs!\n");
                 return -1;
             }
             else
@@ -81,6 +88,7 @@ int read_inputs(const char *filename, int **dst1, int **dst2, const size_t n)
 
         if (tmp1 == NULL || tmp2 == NULL)
         {
+            printf("Error realloc returned NULLptrs!\n");
             return -1;
         }
         else
