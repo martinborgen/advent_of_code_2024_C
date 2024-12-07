@@ -6,8 +6,10 @@
 
 #define LINE_BUFF_SIZE 8192
 
-// after finding a 'mul(' instance, this function is to determine if it is a valid multiplication call
-int mul_parser(char *str, size_t str_len)
+// after finding a 'mul(' instance, this function is to determine if it is a
+// valid multiplication call
+// returns the number of parsed characters
+int mul_parser(char *str, size_t str_len, int *parsed)
 {
     size_t numA_digits = 0;
     size_t numB_digits = 0;
@@ -96,10 +98,9 @@ int main()
 
     working[working_size] = '\0';
 
-    // printf("%s", working);
     int output = 0;
     char key[] = "mul(";
-    int i = 0;
+    size_t i = 0;
     while (i < working_size)
     {
         char *tst = strstr(working + i, key);
@@ -107,9 +108,12 @@ int main()
         {
             break;
         }
-        int res = mul_parser(tst, working_size - (int)working - i - (unsigned)tst);
+
+        i = (size_t)tst - (size_t)working; // re-set i as tst and working are pointers, not offsets
+        int res;
+        int parsed = mul_parser(tst, working_size - i, &res);
         output += res;
-        i += sizeof(key) - 1;
+        i += parsed + sizeof(key) - 1; // increment to avoid the just parsed 'mult()' -bit
     }
     printf("Total sum is: %d\n", output);
 }
