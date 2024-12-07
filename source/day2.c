@@ -61,6 +61,42 @@ bool check_report_safety(char *report, const size_t report_len)
     return true;
 }
 
+void remove_level(char *report, const int skip)
+{
+    if (skip <= 0)
+    {
+        return;
+    }
+
+    int nums_count = 0;
+    int last_space_idx = 0;
+    int space_idx = 0;
+    int len = strnlen(report, READ_LINE_SIZE);
+
+    for (int i = 0; i < len; i++)
+    {
+        if (report[i] == ' ')
+        {
+            nums_count++;
+            last_space_idx = space_idx;
+            space_idx = i;
+        }
+
+        if (nums_count > skip)
+        {
+            break;
+        }
+    }
+
+    int shift = space_idx - last_space_idx;
+    int i;
+    for (i = space_idx; i < len; i++)
+    {
+        report[i - shift] = report[i];
+    }
+    report[len - shift] = '\0';
+}
+
 int main()
 {
     FILE *input_ptr = fopen("../../inputs/day2.txt", "r"); // Note: make sure this is correct relative to where you run from!
