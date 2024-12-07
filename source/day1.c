@@ -26,6 +26,75 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define INIT_BUF_SIZE 128
+#define READ_LINE_SIZE 128
+
+int read_inputs(const char *filename, int **dst1, int **dst2, const size_t n)
+{
+    FILE *fptr;
+    int rows_read = 0;
+    int arr_size = n;
+    char line_buf[READ_LINE_SIZE];
+
+    fptr = fopen(filename, "r");
+    *dst1 = malloc(sizeof(int) * INIT_BUF_SIZE);
+    *dst2 = malloc(sizeof(int) * INIT_BUF_SIZE);
+
+    if (fptr == NULL || dst1 == NULL || dst2 == NULL)
+    {
+        return -1;
+    }
+
+    while (fgets(line_buf, READ_LINE_SIZE, fptr))
+    {
+        if (rows_read > arr_size)
+        {
+            int *tmp1 = realloc(*dst1, sizeof(int) * arr_size * 2);
+            int *tmp2 = realloc(*dst2, sizeof(int) * arr_size * 2);
+
+            if (tmp1 == NULL || tmp2 == NULL)
+            {
+                return -1;
+            }
+            else
+            {
+                *dst1 = tmp1;
+                *dst2 = tmp2;
+                arr_size *= 2;
+            }
+        }
+
+        int left;
+        int right;
+        int res = sscanf(line_buf, "%d %d", &left, &right);
+
+        (*dst1)[rows_read] = left;
+        (*dst2)[rows_read] = right;
+
+        rows_read++;
+    }
+
+    if (arr_size > rows_read)
+    {
+        int *tmp1 = realloc(*dst1, sizeof(int) * rows_read);
+        int *tmp2 = realloc(*dst2, sizeof(int) * rows_read);
+
+        if (tmp1 == NULL || tmp2 == NULL)
+        {
+            return -1;
+        }
+        else
+        {
+            *dst1 = tmp1;
+            *dst2 = tmp2;
+            arr_size = rows_read;
+        }
+    }
+
+    fclose(fptr);
+    return arr_size;
+}
+
 int main()
 {
     printf("Hello world");
