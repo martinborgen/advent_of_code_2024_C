@@ -9,3 +9,8 @@ add_executable(
     day2
     ${PROJECT_SOURCE_DIR}/source/day2.c
 )
+
+add_executable(
+    day3
+    ${PROJECT_SOURCE_DIR}/source/day3.c
+)
