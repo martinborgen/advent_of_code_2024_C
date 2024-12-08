@@ -17,7 +17,7 @@ int count_instances(const char *haystack, const char *key)
     {
         count++;
         offset = instance - haystack;
-        instance = strstr(haystack + offset + key_len - 1, key);
+        instance = strstr(haystack + offset + key_len, key);
     }
 
     return count;
