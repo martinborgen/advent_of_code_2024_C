@@ -1,5 +1,6 @@
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "file_reader.h"
 
@@ -10,7 +11,7 @@ char *file_reader(const char *filename)
     if (inputs_ptr == NULL)
     {
         printf("Error opening file!\n");
-        return -1;
+        return NULL;
     }
 
     fseek(inputs_ptr, 0, SEEK_END);
@@ -22,7 +23,7 @@ char *file_reader(const char *filename)
     if (output == NULL)
     {
         printf("Malloc error!\n");
-        return -1;
+        return NULL;
     }
 
     fread(output, working_size, 1, inputs_ptr);
