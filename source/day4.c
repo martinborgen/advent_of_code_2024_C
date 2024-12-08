@@ -101,6 +101,15 @@ size_t get_diag(char *dst,
 int main()
 {
     char *puzzle = file_reader(INPUTS_PATH);
-    char test[] = "hejhejsvejhejhejsvej";
-    int cnt = count_instances(test, "svej");
+    size_t rows_n = strcnt(puzzle, "\n");
+    size_t cols_n = strstr(puzzle, "\n") - puzzle;
+
+    char(*array)[cols_n] = malloc(sizeof(*array) * rows_n);
+
+    char *row = puzzle;
+    for (int i = 0; i < rows_n; i++)
+    {
+        memcpy(array[i], row, cols_n);
+        row = strstr(row, "\n") + 1;
+    }
 }
