@@ -25,6 +25,42 @@ int strcnt(const char *haystack, const char *key)
     return count;
 }
 
+/* Copies the row to dst. ´reverse = true` reverses it */
+void get_row(char *arr, char *dst, size_t row, size_t rows_n, size_t cols_n, bool reverse)
+{
+    int idx;
+    for (int i = 0; i < cols_n; i++)
+    {
+        if (reverse)
+        {
+            idx = cols_n - 1 - i;
+        }
+        else
+        {
+            idx = i;
+        }
+        dst[idx] = arr[row * cols_n + i];
+    }
+}
+
+/* Copies the col to dst. ´reverse = true` reverses it */
+void get_col(char *arr, char *dst, size_t col, size_t rows_n, size_t cols_n, bool reverse)
+{
+    int idx;
+    for (int i = 0; i < rows_n; i++)
+    {
+        if (reverse)
+        {
+            idx = rows_n - 1 - i;
+        }
+        else
+        {
+            idx = i;
+        }
+        dst[idx] = arr[i * cols_n + col];
+    }
+}
+
 int main()
 {
     char *puzzle = file_reader(INPUTS_PATH);
