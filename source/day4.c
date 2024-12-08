@@ -26,7 +26,12 @@ int strcnt(const char *haystack, const char *key)
 }
 
 /* Copies the row to dst. ´reverse = true` reverses it */
-void get_row(char *arr, char *dst, size_t row, size_t rows_n, size_t cols_n, bool reverse)
+void get_row(char *dst,
+             size_t row,
+             size_t rows_n,
+             size_t cols_n,
+             char arr[rows_n][cols_n],
+             bool reverse)
 {
     int idx;
     for (int i = 0; i < cols_n; i++)
@@ -39,12 +44,17 @@ void get_row(char *arr, char *dst, size_t row, size_t rows_n, size_t cols_n, boo
         {
             idx = i;
         }
-        dst[idx] = arr[row * cols_n + i];
+        dst[idx] = arr[row][i];
     }
 }
 
 /* Copies the col to dst. ´reverse = true` reverses it */
-void get_col(char *arr, char *dst, size_t col, size_t rows_n, size_t cols_n, bool reverse)
+void get_col(char *dst,
+             size_t col,
+             size_t rows_n,
+             size_t cols_n,
+             char arr[rows_n][cols_n],
+             bool reverse)
 {
     int idx;
     for (int i = 0; i < rows_n; i++)
@@ -57,8 +67,35 @@ void get_col(char *arr, char *dst, size_t col, size_t rows_n, size_t cols_n, boo
         {
             idx = i;
         }
-        dst[idx] = arr[i * cols_n + col];
+        dst[idx] = arr[i][col];
     }
+}
+
+/* writes elements of `arr` into `dst`, depending on starting pos and direction. Returns characters written. */
+size_t get_diag(char *dst,
+                size_t start_row,
+                size_t start_col,
+                size_t rows_n,
+                size_t cols_n,
+                char arr[rows_n][cols_n],
+                int x_dir,
+                int y_dir)
+{
+    size_t written = 0;
+    size_t step = 0;
+    size_t x = start_row;
+    size_t y = start_col;
+
+    while (x >= 0 && y >= 0 && x < rows_n && y < cols_n)
+    {
+        dst[step] = arr[x][y];
+        written++;
+        step++;
+        x += x_dir;
+        y += y_dir;
+    }
+
+    return written;
 }
 
 int main()
