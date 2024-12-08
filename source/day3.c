@@ -97,23 +97,81 @@ int main()
     fclose(inputs_ptr);
 
     working[working_size] = '\0';
-
     unsigned long output = 0;
-    char key[] = "mul(";
+
+    bool mul_enabled = true;
+
+    char mul_key[] = "mul(";
+    char do_key[] = "do()";
+    char dont_key[] = "don't()";
+
     size_t i = 0;
     while (i < working_size)
     {
-        char *nxt = strstr(working + i, key);
-        if (nxt == NULL)
+        char c = working[i];
+        if (c == 'm' && mul_enabled)
         {
-            break;
-        }
+            bool is_mul = true;
+            for (int j = 0; j < sizeof(mul_key) - 1; j++)
+            {
+                if (working[i + j] != mul_key[j])
+                {
+                    is_mul = false;
+                    i += j;
+                    break;
+                }
+            }
 
-        i = (size_t)nxt - (size_t)working; // re-set i as nxt and working are pointers, not offsets
-        int res;
-        int parsed = mul_parser(nxt, working_size - i, &res);
-        output += res;
-        i += parsed; // increment to avoid the just parsed 'mult()' -bit
+            if (is_mul)
+            {
+                int res;
+                int parsed = mul_parser(working + i, working_size - i, &res);
+                output += res;
+                i += parsed;
+            }
+        }
+        else if (c == 'd')
+        {
+            // First check for do()
+            bool is_do = true;
+            int j;
+            for (j = 0; j < sizeof(do_key) - 1; j++)
+            {
+                if (working[i + j] != do_key[j])
+                {
+                    is_do = false;
+                    break;
+                }
+            }
+
+            if (is_do)
+            {
+                mul_enabled = true;
+            }
+            else
+            {
+                // if not do, then maybe a don't()
+                bool is_dont = true;
+                for (; j < sizeof(dont_key) - 1; j++)
+                {
+                    if (working[i + j] != dont_key[j])
+                    {
+                        is_dont = false;
+                    }
+                }
+
+                if (is_dont)
+                {
+                    mul_enabled = false;
+                }
+            }
+            i += j;
+        }
+        else
+        {
+
+            i++;
+        }
     }
     printf("Total sum is: %ld\n", output);
 }
