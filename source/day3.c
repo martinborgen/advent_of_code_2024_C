@@ -157,6 +157,7 @@ int main()
                     if (working[i + j] != dont_key[j])
                     {
                         is_dont = false;
+                        break;
                     }
                 }
 
