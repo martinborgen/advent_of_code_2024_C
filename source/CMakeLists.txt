@@ -25,3 +25,8 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/lib/file_reader.h
     ${PROJECT_SOURCE_DIR}/source/file_reader.c
 )
+
+add_executable(
+    day5
+    ${PROJECT_SOURCE_DIR}/source/day5.c
+)
