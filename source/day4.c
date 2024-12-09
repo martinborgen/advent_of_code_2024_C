@@ -27,13 +27,13 @@ int strcnt(const char *haystack, const char *key)
 
 /* writes elements of `arr` into `dst`, depending on starting pos and direction. Returns characters written. */
 size_t get_diag(char *dst,
-                size_t start_row,
-                size_t start_col,
-                size_t rows_n,
-                size_t cols_n,
-                char arr[rows_n][cols_n],
-                int x_dir,
-                int y_dir)
+                const size_t start_row,
+                const size_t start_col,
+                const size_t rows_n,
+                const size_t cols_n,
+                const char arr[rows_n][cols_n],
+                const int x_dir,
+                const int y_dir)
 {
     size_t written = 0;
     size_t step = 0;
