@@ -25,52 +25,6 @@ int strcnt(const char *haystack, const char *key)
     return count;
 }
 
-/* Copies the row to dst. ´reverse = true` reverses it */
-void get_row(char *dst,
-             size_t row,
-             size_t rows_n,
-             size_t cols_n,
-             char arr[rows_n][cols_n],
-             bool reverse)
-{
-    int idx;
-    for (int i = 0; i < cols_n; i++)
-    {
-        if (reverse)
-        {
-            idx = cols_n - 1 - i;
-        }
-        else
-        {
-            idx = i;
-        }
-        dst[idx] = arr[row][i];
-    }
-}
-
-/* Copies the col to dst. ´reverse = true` reverses it */
-void get_col(char *dst,
-             size_t col,
-             size_t rows_n,
-             size_t cols_n,
-             char arr[rows_n][cols_n],
-             bool reverse)
-{
-    int idx;
-    for (int i = 0; i < rows_n; i++)
-    {
-        if (reverse)
-        {
-            idx = rows_n - 1 - i;
-        }
-        else
-        {
-            idx = i;
-        }
-        dst[idx] = arr[i][col];
-    }
-}
-
 /* writes elements of `arr` into `dst`, depending on starting pos and direction. Returns characters written. */
 size_t get_diag(char *dst,
                 size_t start_row,
