@@ -52,6 +52,18 @@ size_t get_diag(char *dst,
     return written;
 }
 
+int my_max(int a, int b)
+{
+    if (a > b)
+    {
+        return a;
+    }
+    else
+    {
+        return b;
+    }
+}
+
 int main()
 {
     char *puzzle = file_reader(INPUTS_PATH);
