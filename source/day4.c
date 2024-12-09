@@ -8,6 +8,14 @@
 
 #define INPUTS_PATH "../../inputs/day4.txt"
 
+/* you're supposed to find two MAS in the shape of an X. One way to achieve that is like this:
+
+M.S
+.A.
+M.S
+
+ */
+
 /* Count instances of `key` in `haystack`. Both `key` and `haystack` must be null-terminated */
 int strcnt(const char *haystack, const char *key)
 {
