@@ -81,80 +81,51 @@ int main()
 
     char *xmas = "XMAS";
     int count = 0;
-    // find all horizontal
-    char *row = malloc(sizeof(char) * (cols_n + 1));
-    row[cols_n] = '\0';
-    for (int i = 0; i < rows_n; i++)
+
+    for (size_t r = 1; r < rows_n - 1; r++)
     {
-        get_diag(row, i, 0, rows_n, cols_n, array, 0, 1);
-        count += strcnt(row, xmas);
-
-        get_diag(row, i, cols_n - 1, rows_n, cols_n, array, 0, -1);
-        count += strcnt(row, xmas);
-    }
-    free(row);
-
-    // find all veritcal
-    char *col = malloc(sizeof(char) * (rows_n + 1));
-    col[rows_n] = '\0';
-    for (int i = 0; i < cols_n; i++)
-    {
-        get_diag(col, 0, i, rows_n, cols_n, array, 1, 0);
-        count += strcnt(col, xmas);
-
-        get_diag(col, rows_n - 1, i, rows_n, cols_n, array, -1, 0);
-        count += strcnt(col, xmas);
-    }
-    free(col);
-
-    // find all diagonal
-    size_t diag_return;
-    size_t diag_max = my_max(rows_n, cols_n);
-    char *diag = malloc(sizeof(char) * (diag_max + 1));
-    for (int i = 0; i < rows_n; i++)
-    {
-        diag_return = get_diag(diag, i, 0, rows_n, cols_n, array, 1, 1);
-        diag[diag_return] = '\0';
-        count += strcnt(diag, xmas);
-
-        diag_return = get_diag(diag, i, 0, rows_n, cols_n, array, -1, 1);
-        diag[diag_return] = '\0';
-        count += strcnt(diag, xmas);
-
-        diag_return = get_diag(diag, i, cols_n - 1, rows_n, cols_n, array, -1, -1);
-        diag[diag_return] = '\0';
-        count += strcnt(diag, xmas);
-
-        diag_return = get_diag(diag, i, cols_n - 1, rows_n, cols_n, array, 1, -1);
-        diag[diag_return] = '\0';
-        count += strcnt(diag, xmas);
-    }
-
-    for (int i = 0; i < cols_n; i++)
-    {
-        if (i != 0)
+        for (size_t c = 1; c < cols_n - 1; c++)
         {
-            diag_return = get_diag(diag, 0, i, rows_n, cols_n, array, 1, 1);
-            diag[diag_return] = '\0';
-            count += strcnt(diag, xmas);
+            char chr = array[r][c];
+            if (chr == 'A')
+            {
+                bool x_mas = false;
+                if (array[r - 1][c - 1] == 'M' &&
+                    array[r + 1][c + 1] == 'S' &&
+                    array[r - 1][c + 1] == 'M' &&
+                    array[r + 1][c - 1] == 'S')
+                {
+                    x_mas = true;
+                }
+                else if (array[r - 1][c - 1] == 'M' &&
+                         array[r + 1][c + 1] == 'S' &&
+                         array[r - 1][c + 1] == 'S' &&
+                         array[r + 1][c - 1] == 'M')
+                {
+                    x_mas = true;
+                }
+                else if (array[r - 1][c - 1] == 'S' &&
+                         array[r + 1][c + 1] == 'M' &&
+                         array[r - 1][c + 1] == 'M' &&
+                         array[r + 1][c - 1] == 'S')
+                {
+                    x_mas = true;
+                }
+                else if (array[r - 1][c - 1] == 'S' &&
+                         array[r + 1][c + 1] == 'M' &&
+                         array[r - 1][c + 1] == 'S' &&
+                         array[r + 1][c - 1] == 'M')
+                {
+                    x_mas = true;
+                }
 
-            diag_return = get_diag(diag, rows_n - 1, i, rows_n, cols_n, array, -1, 1);
-            diag[diag_return] = '\0';
-            count += strcnt(diag, xmas);
-        }
-
-        if (i != cols_n - 1)
-        {
-            diag_return = get_diag(diag, 0, i, rows_n, cols_n, array, 1, -1);
-            diag[diag_return] = '\0';
-            count += strcnt(diag, xmas);
-
-            diag_return = get_diag(diag, rows_n - 1, i, rows_n, cols_n, array, -1, -1);
-            diag[diag_return] = '\0';
-            count += strcnt(diag, xmas);
+                if (x_mas)
+                {
+                    count++;
+                }
+            }
         }
     }
-    free(diag);
 
     printf("%d", count);
 }
