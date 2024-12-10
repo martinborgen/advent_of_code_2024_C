@@ -155,6 +155,25 @@ void read_updates(const char *filepath, struct int_vector **updates, size_t *n_u
     fclose(inputs_2);
 }
 
+bool verify_update(struct int_vector *update, struct int_vector *rules)
+{
+    for (size_t i = 1; i <= update->length; i++)
+    {
+        int current_num = update->values[update->length - i];
+
+        for (size_t j = 0; j < update->length - i; j++)
+        {
+            int previously_printed = update->values[j];
+            if (int_vector_contains(&rules[current_num], previously_printed))
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
 int main()
 {
     struct int_vector *rules = malloc(sizeof(struct int_vector) * MAX_PAGE_NUMBERS);
@@ -176,11 +195,9 @@ int main()
             printf("%d, ", rules[i].values[j]);
         }
         printf("\n");
-
-        int_vector_destruct(&rules[i]);
     }
-    free(rules);
-    rules = NULL;
+
+    int answer = 0;
 
     printf("The pages read:\n");
     for (int i = 0; i < n_updates; i++)
@@ -192,13 +209,22 @@ int main()
 
         if (updates[i].length > 0)
         {
+            bool update_is_correct = verify_update(&updates[i], rules);
+            if (update_is_correct)
+            {
+                size_t mid_index = updates[i].length / 2;
+                answer += updates[i].values[mid_index];
+                printf(" - correct!");
+            }
+            else
+            {
+                printf(" - incorrect");
+            }
             printf("\n");
         }
-
-        int_vector_destruct(&updates[i]);
     }
-    free(updates);
-    updates = NULL;
+
+    printf("And the answer is: %d\n", answer);
 
     return 0;
 }
