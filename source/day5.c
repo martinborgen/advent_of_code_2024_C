@@ -63,6 +63,18 @@ What do you get if you add up the middle page number from those correctly-ordere
 ADIITIONAL ASSUMPTIONS BY CODE AUTHOR:
     Only two-digit page numbers?
     Page numbers are non-zero?
+
+PS: Note that I'm not sure that simply sorting the way I did here necessarily will solve the puzzle.
+
+consider:
+
+1|2
+3|5
+4|5
+4|2
+
+1, 2, 3, 4, 5 would be considered sorted by the bubble-sort, even though it violates the 4|2 rule.
+In the end, i added an independent check that all updates were valid, so it still checks out.
 */
 
 #include <stdlib.h>
