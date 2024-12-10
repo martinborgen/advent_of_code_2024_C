@@ -155,6 +155,38 @@ void read_updates(const char *filepath, struct int_vector **updates, size_t *n_u
     fclose(inputs_2);
 }
 
+void bubblesort_update(struct int_vector *update, struct int_vector *rules)
+{
+    if (update->length < 2)
+    {
+        return;
+    }
+
+    bool is_sorted = false;
+    bool has_bubbled;
+    while (!is_sorted)
+    {
+        has_bubbled = false;
+        for (size_t i = 1; i < update->length; i++)
+        {
+            int current = update->values[i];
+            int previous = update->values[i - 1];
+
+            if (int_vector_contains(&rules[current], previous))
+            {
+                update->values[i - 1] = current;
+                update->values[i] = previous;
+                has_bubbled = true;
+            }
+        }
+
+        if (!has_bubbled)
+        {
+            is_sorted = true;
+        }
+    }
+}
+
 bool verify_update(struct int_vector *update, struct int_vector *rules)
 {
     for (size_t i = 1; i <= update->length; i++)
@@ -197,7 +229,9 @@ int main()
         printf("\n");
     }
 
-    int answer = 0;
+    int answer_pt1 = 0;
+    int answer_pt2 = 0;
+    int failed_sorts = 0;
 
     printf("The pages read:\n");
     for (int i = 0; i < n_updates; i++)
@@ -210,21 +244,42 @@ int main()
         if (updates[i].length > 0)
         {
             bool update_is_correct = verify_update(&updates[i], rules);
+            size_t mid_index = updates[i].length / 2;
             if (update_is_correct)
             {
-                size_t mid_index = updates[i].length / 2;
-                answer += updates[i].values[mid_index];
+                answer_pt1 += updates[i].values[mid_index];
                 printf(" - correct!");
             }
             else
             {
-                printf(" - incorrect");
+                printf(" - incorrect, sorted is:");
+                bubblesort_update(&updates[i], rules);
+
+                for (size_t k = 0; k < updates[i].length; k++)
+                {
+                    printf("%d, ", updates[i].values[k]);
+                }
+
+                if (verify_update(&updates[i], rules))
+                {
+                    printf("Sort sucessful");
+                    answer_pt2 += updates[i].values[mid_index];
+                }
+                else
+                {
+                    printf("Sort FAILED!");
+                    failed_sorts++;
+                }
             }
             printf("\n");
         }
     }
 
-    printf("And the answer is: %d\n", answer);
+    printf("And the answer to part 1 is: %d\n", answer_pt1);
+
+    printf("And the answer to part 2 is: %d\n", answer_pt2);
+
+    printf("NOTE: %d failed sorts\n", failed_sorts);
 
     return 0;
 }
