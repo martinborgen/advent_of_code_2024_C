@@ -41,4 +41,7 @@ size_t int_vector_get_index_of(struct int_vector *vect, int val);
 /* Returns a vector with zero elements */
 struct int_vector int_vector_new();
 
+/* Free's the values, set all values to NULL or zero */
+void int_vector_destruct(struct int_vector *vec);
+
 #endif
