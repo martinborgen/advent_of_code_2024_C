@@ -30,7 +30,8 @@ int main()
     }
 
     int res_push_front_1 = int_vector_push_front(&test_vec, 0);
-    if (res_push_front_1 != 0 || test_vec.capacity != 4 || test_vec.length != 3 || test_vec.values[0] != 0 || test_vec.values[test_vec.length - 1] != 2)
+    if (res_push_front_1 != 0 || test_vec.capacity != 4 || test_vec.length != 3 ||
+        test_vec.values[0] != 0 || test_vec.values[1] != 1 || test_vec.values[2] != 2)
     {
         printf("Error on push_front on vector with two element in it\n");
         output--;
