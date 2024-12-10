@@ -72,13 +72,9 @@ int int_vector_push_front(struct int_vector *vec, int val)
         }
     }
 
-    if (vec->length > 1)
+    for (size_t i = 1; i <= vec->length; i++)
     {
-        for (size_t i = vec->length - 1; i > 0; i--)
-        {
-            vec->values[i + 1] = vec->values[i];
-        }
-        vec->values[1] = vec->values[0]; // as size_t can't be negative, for-loop will not end if we loop while i >= 0
+        vec->values[vec->length - i + 1] = vec->values[vec->length - i];
     }
 
     vec->values[0] = val;
