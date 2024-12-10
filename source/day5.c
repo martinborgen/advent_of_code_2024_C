@@ -67,10 +67,138 @@ ADIITIONAL ASSUMPTIONS BY CODE AUTHOR:
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdbool.h>
+
+#include "vector.h"
 
 #define INPUTS_1_PATH "../inputs/day5_1.txt"
 #define INPUTS_2_PATH "../inputs/day5_2.txt"
+#define MAX_PAGE_NUMBERS 100
+#define LINE_BUFF_SIZE 128
+
+// reads in the rules. max_page_number is used as the rules are hashed, such that `rules[23]` is the rule for number 23
+void read_rules(const char *filepath, struct int_vector *rules, const size_t max_page_n)
+{
+    FILE *inputs_1 = fopen(filepath, "r");
+
+    for (int i = 0; i < max_page_n; i++)
+    {
+        rules[i] = int_vector_new();
+    }
+
+    char line[LINE_BUFF_SIZE];
+    while (fgets(line, LINE_BUFF_SIZE, inputs_1))
+    {
+        int a;
+        int b;
+        sscanf(line, "%d|%d", &a, &b);
+
+        int_vector_push_back(&rules[a], b);
+    }
+}
+
+// reads the updates
+// takes a pointer to `struct int_vector *updates` as it might be re-alloced if required
+// in that case, will also update `size_t n_updates`
+void read_updates(const char *filepath, struct int_vector **updates, size_t *n_updates)
+{
+    FILE *inputs_2 = fopen(filepath, "r");
+
+    if (*n_updates == 0)
+    {
+        *n_updates = 200;
+    }
+
+    *updates = malloc(sizeof(struct int_vector) * *n_updates);
+
+    size_t lines_read = 0;
+    char line[LINE_BUFF_SIZE];
+    while (fgets(line, LINE_BUFF_SIZE, inputs_2))
+    {
+        if (lines_read >= *n_updates)
+        {
+            size_t new_size = *n_updates * 2;
+            struct int_vector *tmp = realloc(*updates, sizeof(struct int_vector) * new_size);
+            if (tmp == NULL)
+            {
+                printf("realloc error in read_updates()!\n");
+                fclose(inputs_2);
+                return;
+            }
+            else
+            {
+                *n_updates = new_size;
+                *updates = tmp;
+            }
+        }
+
+        (*updates)[lines_read] = int_vector_new();
+        char *tok = strtok(line, ",");
+        while (tok != NULL)
+        {
+            int page_no;
+            sscanf(tok, "%d", &page_no);
+            int res = int_vector_push_back(&(*updates)[lines_read], page_no);
+            if (res != 0)
+            {
+                printf("Error push_back in read_updates!\n");
+                fclose(inputs_2);
+                return;
+            }
+            tok = strtok(NULL, ",");
+        }
+
+        lines_read++;
+    }
+
+    fclose(inputs_2);
+}
 
 int main()
 {
+    struct int_vector *rules = malloc(sizeof(struct int_vector) * MAX_PAGE_NUMBERS);
+    read_rules(INPUTS_1_PATH, rules, MAX_PAGE_NUMBERS);
+
+    size_t n_updates = 0;
+    struct int_vector *updates;
+    read_updates(INPUTS_2_PATH, &updates, &n_updates);
+
+    for (int i = 0; i < MAX_PAGE_NUMBERS; i++)
+    {
+        if (rules[i].length == 0)
+        {
+            continue;
+        }
+        printf("Page %d must come before: ", i);
+        for (int j = 0; j < rules[i].length; j++)
+        {
+            printf("%d, ", rules[i].values[j]);
+        }
+        printf("\n");
+
+        int_vector_destruct(&rules[i]);
+    }
+    free(rules);
+    rules = NULL;
+
+    printf("The pages read:\n");
+    for (int i = 0; i < n_updates; i++)
+    {
+        for (int j = 0; j < updates[i].length; j++)
+        {
+            printf("%d, ", updates[i].values[j]);
+        }
+
+        if (updates[i].length > 0)
+        {
+            printf("\n");
+        }
+
+        int_vector_destruct(&updates[i]);
+    }
+    free(updates);
+    updates = NULL;
+
+    return 0;
 }

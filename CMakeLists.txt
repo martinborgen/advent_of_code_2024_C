@@ -31,6 +31,7 @@ add_executable(
 add_executable(
     day5
     ${PROJECT_SOURCE_DIR}/source/day5.c
+    ${PROJECT_SOURCE_DIR}/source/vector.c
 )
 
 
