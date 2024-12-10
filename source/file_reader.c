@@ -6,19 +6,19 @@
 
 char *file_reader(const char *filename)
 {
-    FILE *inputs_ptr = fopen(filename, "r");
+    FILE *file_ptr = fopen(filename, "r");
 
-    if (inputs_ptr == NULL)
+    if (file_ptr == NULL)
     {
         printf("Error opening file!\n");
         return NULL;
     }
 
-    fseek(inputs_ptr, 0, SEEK_END);
-    const size_t working_size = ftell(inputs_ptr);
-    rewind(inputs_ptr);
+    fseek(file_ptr, 0, SEEK_END);
+    const size_t file_length = ftell(file_ptr);
+    rewind(file_ptr);
 
-    char *output = malloc(working_size + 1);
+    char *output = malloc(file_length + 1);
 
     if (output == NULL)
     {
@@ -26,8 +26,8 @@ char *file_reader(const char *filename)
         return NULL;
     }
 
-    fread(output, working_size, 1, inputs_ptr);
-    fclose(inputs_ptr);
+    fread(output, file_length, 1, file_ptr);
+    fclose(file_ptr);
 
     return output;
 }
