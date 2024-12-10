@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "vector.h"
 
@@ -83,6 +84,31 @@ int int_vector_push_front(struct int_vector *vec, int val)
     vec->values[0] = val;
     vec->length++;
     return 0;
+}
+
+bool int_vector_contains(struct int_vector *vect, int val)
+{
+    for (size_t i = 0; i < vect->length; i++)
+    {
+        if (vect->values[i] == val)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+size_t int_vector_get_index_of(struct int_vector *vect, int val)
+{
+    size_t result = __SIZE_MAX__; // for lack of better return type when item does not exist
+    for (size_t i = 0; i < vect->length; i++)
+    {
+        if (vect->values[i] == val)
+        {
+            result = i;
+        }
+    }
+    return result;
 }
 
 struct int_vector int_vector_new()

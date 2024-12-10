@@ -1,6 +1,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include "vector.h"
 
 int main()
@@ -35,6 +36,34 @@ int main()
         output--;
     }
 
+    bool res_search_1 = int_vector_contains(&test_vec, 2);
+    if (res_search_1 == false)
+    {
+        printf("Error in contains, expected true but got false\n");
+        output--;
+    }
+
+    bool res_search_2 = int_vector_contains(&test_vec, 8);
+    if (res_search_2 == true)
+    {
+        printf("Error in contains, expected false but got true\n");
+        output--;
+    }
+
+    size_t res_get_index_of_1 = int_vector_get_index_of(&test_vec, 1);
+    if (res_get_index_of_1 != 1)
+    {
+        printf("Error in getting index of 1 which should exist at index 1\n");
+        output--;
+    }
+
+    size_t res_get_index_of_12 = int_vector_get_index_of(&test_vec, 12);
+    if (res_get_index_of_12 != __SIZE_MAX__)
+    {
+        printf("Error in getting index of 12 which should have returned SIZE_MAX\n");
+        output--;
+    }
+
     int res_resize_to_1 = int_vector_set_capacity(&test_vec, 1);
     if (res_resize_to_1 != 0 || test_vec.capacity != 1 || test_vec.length != 1 || test_vec.values[0] != 0)
     {
@@ -47,6 +76,12 @@ int main()
     {
         printf("Error, resizing down to size 0 not behaving as expected\n");
         output--;
+    }
+
+    bool res_search_3 = int_vector_contains(&test_vec, 8);
+    if (res_search_3 == true)
+    {
+        printf("Error in contains, expected false but got true\n");
     }
 
     int push_front_2 = int_vector_push_front(&test_vec, 9);

@@ -31,6 +31,13 @@ Will extend the vector by doubling its capacity if it is out of space
 returns 0 if successful. */
 int int_vector_push_front(struct int_vector *vec, int val);
 
+/* Linear search through the vector */
+bool int_vector_contains(struct int_vector *vect, int val);
+
+/* Linear search through the vector. Returns SIZE_MAX if item does not exist
+(even if vector does not have SIZE_MAX capacity) */
+size_t int_vector_get_index_of(struct int_vector *vect, int val);
+
 /* Returns a vector with zero elements */
 struct int_vector int_vector_new();
 
