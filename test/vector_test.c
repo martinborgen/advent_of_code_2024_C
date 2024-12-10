@@ -13,6 +13,6 @@ int main()
         return -1;
     }
 
-    printf("hello again and again testing world!");
+    printf("hello again testing world!");
     return 0;
 }

@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #define LINE_BUFF_SIZE 8192
+#define INPUTS_PATH "../inputs/day3.txt"
 
 // after finding a 'mul(' instance, this function is to determine if it is a
 // valid multiplication call
@@ -79,7 +80,7 @@ int mul_parser(char *str, size_t str_len, int *dst)
 
 int main()
 {
-    FILE *inputs_ptr = fopen("../../inputs/day3.txt", "r");
+    FILE *inputs_ptr = fopen(INPUTS_PATH, "r");
 
     if (inputs_ptr == NULL)
     {

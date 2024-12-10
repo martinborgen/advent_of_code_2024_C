@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include "file_reader.h"
 
-#define INPUTS_PATH "../../inputs/day4.txt"
+#define INPUTS_PATH "../inputs/day4.txt"
 
 /* you're supposed to find two MAS in the shape of an X. One way to achieve that is like this:
 

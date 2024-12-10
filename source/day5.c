@@ -68,8 +68,8 @@ ADIITIONAL ASSUMPTIONS BY CODE AUTHOR:
 #include <stdlib.h>
 #include <string.h>
 
-#define INPUTS_1_PATH "../../inputs/day5_1.txt"
-#define INPUTS_2_PATH "../../inputs/day5_2.txt"
+#define INPUTS_1_PATH "../inputs/day5_1.txt"
+#define INPUTS_2_PATH "../inputs/day5_2.txt"
 
 int main()
 {

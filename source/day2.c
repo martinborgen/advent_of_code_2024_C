@@ -6,6 +6,7 @@
 
 #define READ_LINE_SIZE 128
 #define INIT_BUF_SIZE 128
+#define INPUTS_PATH "../inputs/day2.txt"
 
 /*
     Part 1:
@@ -107,7 +108,7 @@ void remove_level(char *report, const int skip)
 
 int main()
 {
-    FILE *input_ptr = fopen("../../inputs/day2.txt", "r"); // Note: make sure this is correct relative to where you run from!
+    FILE *input_ptr = fopen(INPUTS_PATH, "r"); // Note: make sure this is correct relative to where you run from!
 
     if (input_ptr == NULL)
     {

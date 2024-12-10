@@ -29,6 +29,7 @@
 
 #define INIT_BUF_SIZE 128
 #define READ_LINE_SIZE 128
+#define INPUTS_PATH "../inputs/day1.txt"
 
 size_t read_inputs(const char *filename, int **dst1, int **dst2, const size_t n)
 {
@@ -203,7 +204,7 @@ int main()
     int *nums_left;
     int *nums_right;
 
-    size_t arr_size = read_inputs("../../inputs/day1.txt", &nums_left, &nums_right, INIT_BUF_SIZE);
+    size_t arr_size = read_inputs(INPUTS_PATH, &nums_left, &nums_right, INIT_BUF_SIZE);
 
     bubble_sort(nums_left, arr_size);
     bubble_sort(nums_right, arr_size);
