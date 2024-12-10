@@ -112,3 +112,11 @@ struct int_vector int_vector_new()
     struct int_vector vec = {0, 0, NULL};
     return vec;
 }
+
+void int_vector_destruct(struct int_vector *vec)
+{
+    free(vec->values);
+    vec->values = NULL;
+    vec->length = 0;
+    vec->capacity = 0;
+}
