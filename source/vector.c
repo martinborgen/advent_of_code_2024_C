@@ -6,7 +6,7 @@
 
 int int_vector_set_capacity(struct int_vector *vec, size_t capacity)
 {
-    int *new_values_ptr = realloc(vec->values, capacity);
+    int *new_values_ptr = realloc(vec->values, sizeof(int) * capacity);
     if (new_values_ptr != NULL || (capacity == 0 && new_values_ptr == NULL))
     {
         vec->values = new_values_ptr;
