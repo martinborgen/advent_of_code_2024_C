@@ -26,6 +26,11 @@ Will extend the vector by doubling its capacity if it is out of space
 returns 0 if successful. */
 int int_vector_push_back(struct int_vector *vec, int val);
 
+/* Pushes an element to the front of the vector, shifting all pre-existing elements by one.
+Will extend the vector by doubling its capacity if it is out of space
+returns 0 if successful. */
+int int_vector_push_front(struct int_vector *vec, int val);
+
 /* Returns a vector with zero elements */
 struct int_vector int_vector_new();
 
