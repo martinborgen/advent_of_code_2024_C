@@ -34,11 +34,12 @@ Predict the path of the guard. How many distinct positions will the guard visit 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "file_reader.h"
 #include "my_string.h"
 
-#define INPUTS_PATH "../inputs/day6_sample.txt"
+#define INPUTS_PATH "../inputs/day6.txt"
 
 int main()
 {
@@ -58,13 +59,86 @@ int main()
     free(inputs);
     inputs = NULL;
 
-    for (size_t i = 0; i < rows_n; i++)
+    /*  Board is represented as an array
+        ---> y
+        |
+        V
+        x
+    */
+    int count = 1;
+    int guard_x;
+    int guard_y;
+    int guard_dir_x = -1;
+    int guard_dir_y = 0;
+
+    // find start pos
+    for (size_t r = 0; r < rows_n; r++)
     {
-        for (size_t j = 0; j < cols_n; j++)
+        for (size_t c = 0; c < cols_n; c++)
         {
-            printf("%c", array[i][j]);
+            if (array[r][c] == '^')
+            {
+                guard_x = r;
+                guard_y = c;
+            }
         }
-        printf("\n");
     }
+
+    // loop while guard on the board
+    while (guard_x > 0 &&
+           guard_y > 0 &&
+           guard_x < rows_n &&
+           guard_y < cols_n)
+    {
+        bool something_infront;
+        if (array[guard_x + guard_dir_x][guard_y + guard_dir_y] == '#')
+        {
+            something_infront = true;
+        }
+        else
+        {
+            something_infront = false;
+        }
+
+        if (something_infront)
+        {
+            // turn 90 degrees clockwise.
+            if (guard_dir_x > 0)
+            {
+                guard_dir_x = 0;
+                guard_dir_y = -1;
+            }
+            else if (guard_dir_x < 0)
+            {
+                guard_dir_x = 0;
+                guard_dir_y = 1;
+            }
+            else if (guard_dir_y > 0)
+            {
+                guard_dir_x = 1;
+                guard_dir_y = 0;
+            }
+            else
+            {
+                guard_dir_x = -1;
+                guard_dir_y = 0;
+            }
+        }
+        else
+        {
+            // moving forwards
+            guard_x += guard_dir_x;
+            guard_y += guard_dir_y;
+
+            // Check for visited
+            if (array[guard_x][guard_y] == '.')
+            {
+                array[guard_x][guard_y] = 'X';
+                count++;
+            }
+        }
+    }
+
+    printf("Guard visited: %d squares\n", count);
     return 0;
 }
