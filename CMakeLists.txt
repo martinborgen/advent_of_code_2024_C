@@ -7,6 +7,11 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/test)
 include_directories(${CMAKE_SOURCE_DIR}/lib)
 include_directories(${CMAKE_SOURCE_DIR}/test)
 
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+add_compile_options("-Wall")
+
 add_executable(
     day1
     ${PROJECT_SOURCE_DIR}/source/day1.c
@@ -39,6 +44,13 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/source/day6.c
     ${PROJECT_SOURCE_DIR}/source/file_reader.c
     ${PROJECT_SOURCE_DIR}/source/my_string.c
+)
+
+add_executable(
+    day7
+    ${PROJECT_SOURCE_DIR}/source/day7.c
+    ${PROJECT_SOURCE_DIR}/source/vector.c
+
 )
 
 
