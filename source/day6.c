@@ -39,7 +39,7 @@ Part 2: Add one more obstruction to the board such that the guard finds himself 
 #include "file_reader.h"
 #include "my_string.h"
 
-#define INPUTS_PATH "../inputs/day6_sample.txt"
+#define INPUTS_PATH "../inputs/day6.txt"
 
 void print_board(const size_t rows_n, const size_t cols_n, char board[rows_n][cols_n])
 {
@@ -86,7 +86,6 @@ int count_guard_positions(const size_t rows_n, const size_t cols_n, char board[r
     // loop while guard on the board and not going in a loop
     while (1)
     {
-        // print_board(rows_n, cols_n, board);
         bool something_infront;
 
         // plenty of bounds checking, last check is the actually interesting one
@@ -126,7 +125,6 @@ int count_guard_positions(const size_t rows_n, const size_t cols_n, char board[r
                 guard_dir_x = -1;
                 guard_dir_y = 0;
             }
-            // board[guard_x][guard_y] = '+';
         }
         else
         {
@@ -165,23 +163,6 @@ int count_guard_positions(const size_t rows_n, const size_t cols_n, char board[r
                 }
                 count++;
             }
-            else if (((current_square == 'u' || current_square == '^') && guard_dir_x == 0) ||
-                     (current_square == 'd' && guard_dir_x == 0) ||
-                     (current_square == 'l' && guard_dir_y == 0) ||
-                     (current_square == 'r' && guard_dir_y == 0))
-            {
-                // means guard is crossing old path
-                board[guard_x][guard_y] = 'c';
-            }
-            else if (board[guard_x][guard_y] == '+')
-            {
-                // no-op, as this can be a corner like
-                //         ...#...
-                //  exit <-...+#..
-                //         ...|...
-                //         ...^...
-                // So it cannot be used to trigger for loops
-            }
             else if (((current_square == 'u' || current_square == '^') && guard_dir_x == -1) ||
                      (current_square == 'd' && guard_dir_x == 1) ||
                      (current_square == 'l' && guard_dir_y == -1) ||
@@ -189,12 +170,6 @@ int count_guard_positions(const size_t rows_n, const size_t cols_n, char board[r
             {
                 // means loop
                 return -1;
-            }
-            else
-            {
-                // what is this?
-                // this (seems) to be exclusively the case when the guard is "double turning".
-                // printf("Helloings, I've been triggered, so try to find out why!\n");
             }
         }
     }
@@ -247,7 +222,6 @@ int main()
         for (size_t c = 0; c < rows_n; c++)
         {
             memcpy(board_copy, board, rows_n * cols_n);
-            // print_board(rows_n, cols_n, board_copy);
             if (board_copy[r][c] != '.' ||
                 board_copy[r][c] == '^')
             {
