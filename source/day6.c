@@ -195,21 +195,6 @@ int main()
     free(inputs);
     inputs = NULL;
 
-    size_t start_x;
-    size_t start_y;
-    // find start pos
-    for (size_t r = 0; r < rows_n; r++)
-    {
-        for (size_t c = 0; c < cols_n; c++)
-        {
-            if (board[r][c] == '^')
-            {
-                start_x = r;
-                start_y = c;
-            }
-        }
-    }
-
     char(*board_copy)[cols_n] = malloc(sizeof(*board) * rows_n); // board copy, becuse count_guard_positions modifies board
     memcpy(board_copy, board, rows_n * cols_n);
     int count_part1 = count_guard_positions(rows_n, cols_n, board_copy);

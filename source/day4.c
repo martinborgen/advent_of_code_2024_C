@@ -87,7 +87,6 @@ int main()
         line = strstr(line, "\n") + 1;
     }
 
-    char *xmas = "XMAS";
     int count = 0;
 
     for (size_t r = 1; r < rows_n - 1; r++)

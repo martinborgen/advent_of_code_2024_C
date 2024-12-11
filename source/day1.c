@@ -75,7 +75,7 @@ size_t read_inputs(const char *filename, int **dst1, int **dst2, const size_t n)
 
         int left;
         int right;
-        int res = sscanf(line_buf, "%d %d", &left, &right);
+        sscanf(line_buf, "%d %d", &left, &right);
 
         (*dst1)[rows_read] = left;
         (*dst2)[rows_read] = right;

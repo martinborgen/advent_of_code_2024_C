@@ -23,7 +23,7 @@ int mul_parser(char *str, size_t str_len, int *dst)
 
     // start is after 'mul(' (4 chars), then two maximum three digit numbers, a comma and final bracket are max to parse
     int i = 4;
-    for (i; i < 8; i++)
+    for (; i < 8; i++)
     {
         char c = str[i];
         if (c <= '9' && c >= '0')
