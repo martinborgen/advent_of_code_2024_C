@@ -59,7 +59,8 @@ int main()
         int spaces = 0;
         struct int_vector nums = int_vector_new();
         char *token = strtok(line_buf, ": ");
-        uint64_t test_val = strtoull(token, NULL, 10);
+        uint64_t test_val = strtoull(token, &token, 10);
+        token = strtok(NULL, " ");
 
         while (token != NULL)
         {
@@ -73,7 +74,6 @@ int main()
         {
             max_testval = test_val;
         }
-        token = strtok(NULL, " ");
         spaces--; // the loop always adds one too much
 
         // permutate operators, from all + to all *
