@@ -106,7 +106,6 @@ within the bounds of the map contain an antinode?
 #include <string.h>
 
 #include "file_reader.h"
-#include "vector.h"
 #include "my_string.h"
 
 #define INPUTS_PATH "../inputs/day8.txt"
