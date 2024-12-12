@@ -36,6 +36,13 @@ In the above example, the sum of the test values for the three equations listed 
 int main()
 {
     FILE *inputs_ptr = fopen(INPUTS_PATH, "r");
+
+    if (inputs_ptr == NULL)
+    {
+        printf("Error opening file!\n");
+        return -1;
+    }
+
     unsigned long long calibration_result = 0;
 
     char line_buf[LINE_BUF_SIZE];
@@ -45,8 +52,8 @@ int main()
         int spaces = 0;
         struct int_vector nums = int_vector_new();
         char *token = strtok(line_buf, ": ");
-        int test_val = atoi(token);
-        token = strtok(NULL, " ");
+        unsigned long long test_val = strtoull(token, NULL, 10);
+
         while (token != NULL)
         {
             int num = atoi(token);
@@ -59,26 +66,26 @@ int main()
         // permutate operators, from all + to all *
         for (int i = 1; i <= nums.length; i++)
         {
-            int sum_1 = nums.values[0];
+            unsigned long long sum_1 = nums.values[0];
             // first, do product of all initial multiplications
             for (int ii = 1; ii < i; ii++)
             {
-                sum_1 *= nums.values[ii];
+                sum_1 *= (unsigned long long)nums.values[ii];
             }
 
             // then, only sum, except one multiplication which is incremented through the remaining nums
             for (int j = i; j <= nums.length; j++)
             {
-                int sum_2 = sum_1;
+                unsigned long long sum_2 = sum_1;
                 for (int jj = i; jj < nums.length; jj++)
                 {
                     if (jj == j)
                     {
-                        sum_2 *= nums.values[jj];
+                        sum_2 *= (unsigned long long)nums.values[jj];
                     }
                     else
                     {
-                        sum_2 += nums.values[jj];
+                        sum_2 += (unsigned long long)nums.values[jj];
                     }
                 }
 
@@ -106,4 +113,5 @@ int main()
     printf("Part 1. Calibration result: %llu\n", calibration_result);
 
     fclose(inputs_ptr);
+    return 0;
 }
