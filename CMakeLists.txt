@@ -4,7 +4,7 @@ project(advent_of_code_2024_C)
 add_subdirectory(${PROJECT_SOURCE_DIR}/source)
 add_subdirectory(${PROJECT_SOURCE_DIR}/test)
 
-include_directories(${CMAKE_SOURCE_DIR}/lib)
+include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/test)
 
 add_executable(
