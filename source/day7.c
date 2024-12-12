@@ -45,6 +45,12 @@ int main()
 
     unsigned long long calibration_result = 0;
 
+    // temp
+    unsigned long long max_testval = 0;
+    unsigned long long max_testval_found = 0;
+    unsigned testvals_found = 0;
+    // /temp
+
     char line_buf[LINE_BUF_SIZE];
     while (fgets(line_buf, LINE_BUF_SIZE, inputs_ptr))
     {
@@ -61,6 +67,12 @@ int main()
             token = strtok(NULL, " ");
             spaces++;
         }
+        // temp code
+        if (max_testval < test_val)
+        {
+            max_testval = test_val;
+        }
+        token = strtok(NULL, " ");
         spaces--; // the loop always adds one too much
 
         // permutate operators, from all + to all *
@@ -92,6 +104,7 @@ int main()
                 if (sum_2 == test_val)
                 {
                     calibration_result += test_val;
+                    testvals_found++;
                     test_val_found = true;
                     break;
                 }
@@ -104,13 +117,25 @@ int main()
             else if (sum_1 == test_val)
             {
                 calibration_result += test_val;
+                testvals_found++;
                 test_val_found = true;
                 break;
             }
         }
+
+        // temp
+        if (test_val_found && test_val > max_testval_found)
+        {
+            max_testval_found = test_val;
+        }
+
+        int_vector_destruct(&nums);
     }
 
     printf("Part 1. Calibration result: %llu\n", calibration_result);
+
+    // temp code
+    printf("Max testval: %llu\nMax testval found: %llu\nNumber of testvals found: %u\n", max_testval, max_testval_found, testvals_found);
 
     fclose(inputs_ptr);
     return 0;
