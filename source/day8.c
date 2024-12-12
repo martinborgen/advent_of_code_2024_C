@@ -172,33 +172,55 @@ int main()
                 continue;
             }
 
-            size_t left_bound = min_int(c / 2, 0);
-            size_t right_bound = max_int((cols_n - c + 1) / 2, cols_n);
-            size_t top_bound = min_int(r / 2, 0);
-            size_t bottom_bound = max_int((rows_n - r + 1), rows_n);
-
-            for (int i = top_bound; i < bottom_bound; i++)
+            // now looping through all squares again, to see if we find a matching frequency.
+            for (int i = 0; i < rows_n; i++)
             {
-                for (int j = left_bound; j < right_bound; j++)
+                for (int j = 0; j < cols_n; j++)
                 {
-                    if (i == r && j == c)
+                    if (i == r && j == c && board[i][j] != '.')
                     {
                         continue;
                     }
                     else if (board[i][j] == board[r][c])
                     {
+                        // if so, step from the nodes by direction * step, in both
+                        // positive and negative direction.
+
+                        // positive
                         int delta_row = i - r;
                         int delta_col = j - c;
 
-                        int node_r = i + delta_row;
-                        int node_c = j + delta_col;
-                        if (node_r >= 0 && node_r < rows_n &&
-                            node_c >= 0 && node_c < cols_n &&
-                            is_node[node_r][node_c] == false)
+                        int node_r = i;
+                        int node_c = j;
+                        int step = 0;
+                        while (node_r >= 0 && node_r < rows_n &&
+                               node_c >= 0 && node_c < cols_n)
                         {
-                            is_node[node_r][node_c] = true;
-                            // printf("node found at %d, %d\n", node_r, node_c);
-                            node_count++;
+                            if (is_node[node_r][node_c] == false)
+                            {
+                                is_node[node_r][node_c] = true;
+                                node_count++;
+                            }
+                            node_r = r + delta_row * step;
+                            node_c = c + delta_col * step;
+                            step++;
+                        }
+
+                        // negative
+                        node_r = i;
+                        node_c = j;
+                        step = 0;
+                        while (node_r >= 0 && node_r < rows_n &&
+                               node_c >= 0 && node_c < cols_n)
+                        {
+                            if (is_node[node_r][node_c] == false)
+                            {
+                                is_node[node_r][node_c] = true;
+                                node_count++;
+                            }
+                            node_r = r + delta_row * step;
+                            node_c = c + delta_col * step;
+                            step--;
                         }
                     }
                 }
