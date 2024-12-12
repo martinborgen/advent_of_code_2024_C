@@ -31,8 +31,29 @@ In the above example, the sum of the test values for the three equations listed 
 
 #include "vector.h"
 
-#define INPUTS_PATH "../inputs/day7_sample.txt"
+#define INPUTS_PATH "../inputs/day7.txt"
 #define LINE_BUF_SIZE 128
+
+bool makes_testval_recursive(uint64_t a, struct int_vector *nums, size_t index, uint64_t testval)
+{
+    uint64_t val = (uint64_t)nums->values[index];
+    if (index == nums->length - 1)
+    {
+        if (a + val == testval || a * val == testval)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    bool add = makes_testval_recursive(a + val, nums, index + 1, testval);
+    bool mul = makes_testval_recursive(a * val, nums, index + 1, testval);
+
+    return add || mul;
+}
 
 int main()
 {
@@ -46,17 +67,10 @@ int main()
 
     uint64_t calibration_result = 0;
 
-    // temp
-    uint64_t max_testval = 0;
-    uint64_t max_testval_found = 0;
-    unsigned testvals_found = 0;
-    // /temp
-
     char line_buf[LINE_BUF_SIZE];
     while (fgets(line_buf, LINE_BUF_SIZE, inputs_ptr))
     {
         bool test_val_found = false;
-        int spaces = 0;
         struct int_vector nums = int_vector_new();
         char *token = strtok(line_buf, ": ");
         uint64_t test_val = strtoull(token, &token, 10);
@@ -67,76 +81,19 @@ int main()
             int num = atoi(token);
             int_vector_push_back(&nums, num);
             token = strtok(NULL, " ");
-            spaces++;
-        }
-        // temp code
-        if (max_testval < test_val)
-        {
-            max_testval = test_val;
-        }
-        spaces--; // the loop always adds one too much
-
-        // permutate operators, from all + to all *
-        for (int i = 1; i <= nums.length; i++)
-        {
-            uint64_t sum_1 = nums.values[0];
-            // first, do product of all initial multiplications
-            for (int ii = 1; ii < i; ii++)
-            {
-                sum_1 *= (uint64_t)nums.values[ii];
-            }
-
-            // then, only sum, except one multiplication which is incremented through the remaining nums
-            for (int j = i; j <= nums.length; j++)
-            {
-                uint64_t sum_2 = sum_1;
-                for (int jj = i; jj < nums.length; jj++)
-                {
-                    if (jj == j)
-                    {
-                        sum_2 *= (uint64_t)nums.values[jj];
-                    }
-                    else
-                    {
-                        sum_2 += (uint64_t)nums.values[jj];
-                    }
-                }
-
-                if (sum_2 == test_val)
-                {
-                    calibration_result += test_val;
-                    testvals_found++;
-                    test_val_found = true;
-                    break;
-                }
-            }
-
-            if (test_val_found)
-            {
-                break;
-            }
-            else if (sum_1 == test_val)
-            {
-                calibration_result += test_val;
-                testvals_found++;
-                test_val_found = true;
-                break;
-            }
         }
 
-        // temp
-        if (test_val_found && test_val > max_testval_found)
+        test_val_found = makes_testval_recursive(nums.values[0], &nums, 1, test_val);
+
+        if (test_val_found)
         {
-            max_testval_found = test_val;
+            calibration_result += test_val;
         }
 
         int_vector_destruct(&nums);
     }
 
     printf("Part 1. Calibration result: %lu\n", calibration_result);
-
-    // temp code
-    printf("Max testval: %lu\nMax testval found: %lu\nNumber of testvals found: %u\n", max_testval, max_testval_found, testvals_found);
 
     fclose(inputs_ptr);
     return 0;
