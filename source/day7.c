@@ -27,6 +27,7 @@ In the above example, the sum of the test values for the three equations listed 
 #include <string.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdint.h>
 
 #include "vector.h"
 
@@ -43,11 +44,11 @@ int main()
         return -1;
     }
 
-    unsigned long long calibration_result = 0;
+    uint64_t calibration_result = 0;
 
     // temp
-    unsigned long long max_testval = 0;
-    unsigned long long max_testval_found = 0;
+    uint64_t max_testval = 0;
+    uint64_t max_testval_found = 0;
     unsigned testvals_found = 0;
     // /temp
 
@@ -58,7 +59,7 @@ int main()
         int spaces = 0;
         struct int_vector nums = int_vector_new();
         char *token = strtok(line_buf, ": ");
-        unsigned long long test_val = strtoull(token, NULL, 10);
+        uint64_t test_val = strtoull(token, NULL, 10);
 
         while (token != NULL)
         {
@@ -78,26 +79,26 @@ int main()
         // permutate operators, from all + to all *
         for (int i = 1; i <= nums.length; i++)
         {
-            unsigned long long sum_1 = nums.values[0];
+            uint64_t sum_1 = nums.values[0];
             // first, do product of all initial multiplications
             for (int ii = 1; ii < i; ii++)
             {
-                sum_1 *= (unsigned long long)nums.values[ii];
+                sum_1 *= (uint64_t)nums.values[ii];
             }
 
             // then, only sum, except one multiplication which is incremented through the remaining nums
             for (int j = i; j <= nums.length; j++)
             {
-                unsigned long long sum_2 = sum_1;
+                uint64_t sum_2 = sum_1;
                 for (int jj = i; jj < nums.length; jj++)
                 {
                     if (jj == j)
                     {
-                        sum_2 *= (unsigned long long)nums.values[jj];
+                        sum_2 *= (uint64_t)nums.values[jj];
                     }
                     else
                     {
-                        sum_2 += (unsigned long long)nums.values[jj];
+                        sum_2 += (uint64_t)nums.values[jj];
                     }
                 }
 
@@ -132,10 +133,10 @@ int main()
         int_vector_destruct(&nums);
     }
 
-    printf("Part 1. Calibration result: %llu\n", calibration_result);
+    printf("Part 1. Calibration result: %lu\n", calibration_result);
 
     // temp code
-    printf("Max testval: %llu\nMax testval found: %llu\nNumber of testvals found: %u\n", max_testval, max_testval_found, testvals_found);
+    printf("Max testval: %lu\nMax testval found: %lu\nNumber of testvals found: %u\n", max_testval, max_testval_found, testvals_found);
 
     fclose(inputs_ptr);
     return 0;
