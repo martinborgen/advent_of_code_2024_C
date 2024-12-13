@@ -85,6 +85,31 @@ typedef struct file_node
     struct file_node *prev;
 } file_node;
 
+void print_deque(file_node *start)
+{
+    // print list.
+    file_node *current = start;
+    while (current != NULL)
+    {
+        if (current->id >= 0)
+        {
+            for (int j = 0; j < current->blocks; j++)
+            {
+                printf("%d", current->id);
+            }
+        }
+        else
+        {
+            for (int j = 0; j < current->blocks; j++)
+            {
+                printf("%c", '.');
+            }
+        }
+        current = current->next;
+    }
+    printf("\n");
+}
+
 int main()
 {
     char *input = file_reader(INPUTS_PATH);
@@ -121,29 +146,10 @@ int main()
     current->next = NULL; // last datanode
 
     // print list.
-    current = &deque_begin;
-    while (current != NULL)
-    {
-        if (current->id >= 0)
-        {
-            for (int j = 0; j < current->blocks; j++)
-            {
-                printf("%d", current->id);
-            }
-        }
-        else
-        {
-            for (int j = 0; j < current->blocks; j++)
-            {
-                printf("%c", '.');
-            }
-        }
-        current = current->next;
-    }
-    printf("\n");
+    print_deque(&deque_begin);
     current = NULL;
 
-    // compacting the drive
+    // finding the first open space, then the last file
     file_node *left = &deque_begin;
     for (; left->id >= 0; left = left->next)
         ;
@@ -153,8 +159,80 @@ int main()
     for (; right->id < 0; right = right->prev)
         ;
 
-    // TODO: LOOP TO COMPACT FILE
+    while (right != left)
+    {
 
+        while (1 && left != NULL && right != NULL)
+        {
+            if (left == right)
+            {
+                // this right node ain't going nowhere
+                right = right->prev;
+                break;
+            }
+            else if (left->id >= 0)
+            {
+                left = left->next;
+                continue;
+            }
+            else if (left->blocks > right->blocks)
+            {
+                // there will still be some empty space at left
+                // => insert new node left of left, that has ID and blocks from right
+                // decrease ammount of space at left
+                // then, make right into an empty space node
+                file_node *new_node = malloc(sizeof(file_node));
+                new_node->blocks = right->blocks;
+                new_node->id = right->id;
+                right->id = -1;
+
+                new_node->prev = left->prev;
+                left->prev = new_node;
+                new_node->next = left;
+                new_node->prev->next = new_node;
+
+                left->blocks -= right->blocks;
+                break;
+            }
+            else if (left->blocks == right->blocks)
+            {
+                // there will be no empty space at left
+                // => just change right to be an empty space node,
+                // and left to have the ID of right
+                left->id = right->id;
+                right->id = -1;
+                break;
+            }
+            else
+            {
+                // keep lookin for free space
+                left = left->next;
+            }
+        }
+
+        print_deque(&deque_begin);
+
+        // make sure left is sitting on empty space
+        left = left_start;
+        for (; left->id >= 0; left = left->next)
+        {
+            if (left == right)
+            {
+                break;
+            }
+        }
+
+        // make sure right is not sitting on empty space
+        for (; right->id < 0; right = right->prev)
+        {
+            if (right == left)
+            {
+                break;
+            }
+        }
+    }
+
+    print_deque(&deque_begin);
     printf("\n");
 
     return 0;
