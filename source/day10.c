@@ -109,21 +109,12 @@ uint32_t count_paths(size_t rows_n,
                      size_t cols_n,
                      int board[rows_n][cols_n],
                      size_t start_r,
-                     size_t start_c,
-                     bool endpoints_found[rows_n][cols_n])
+                     size_t start_c)
 {
     int current_num = board[start_r][start_c];
     if (current_num == 9)
     {
-        if (endpoints_found[start_r][start_c])
-        {
-            return 0;
-        }
-        else
-        {
-            endpoints_found[start_r][start_c] = true;
-            return 1;
-        }
+        return 1;
     }
 
     uint32_t count = 0;
@@ -131,25 +122,25 @@ uint32_t count_paths(size_t rows_n,
     // look up
     if (start_r > 0 && board[start_r - 1][start_c] == current_num + 1)
     {
-        count += count_paths(rows_n, cols_n, board, start_r - 1, start_c, endpoints_found);
+        count += count_paths(rows_n, cols_n, board, start_r - 1, start_c);
     }
 
     // look down
     if (start_r < rows_n - 1 && board[start_r + 1][start_c] == current_num + 1)
     {
-        count += count_paths(rows_n, cols_n, board, start_r + 1, start_c, endpoints_found);
+        count += count_paths(rows_n, cols_n, board, start_r + 1, start_c);
     }
 
     // look left
     if (start_c > 0 && board[start_r][start_c - 1] == current_num + 1)
     {
-        count += count_paths(rows_n, cols_n, board, start_r, start_c - 1, endpoints_found);
+        count += count_paths(rows_n, cols_n, board, start_r, start_c - 1);
     }
 
     // look right
     if (start_c < rows_n - 1 && board[start_r][start_c + 1] == current_num + 1)
     {
-        count += count_paths(rows_n, cols_n, board, start_r, start_c + 1, endpoints_found);
+        count += count_paths(rows_n, cols_n, board, start_r, start_c + 1);
     }
 
     return count;
@@ -191,16 +182,8 @@ int main()
         {
             if (board[i][j] == 0)
             {
-                bool(*endpoints_found)[cols_n] = malloc(sizeof(*endpoints_found) * rows_n);
-                for (int i = 0; i < rows_n; i++)
-                {
-                    for (int j = 0; j < cols_n; j++)
-                    {
-                        endpoints_found[i][j] = false;
-                    }
-                }
 
-                int trailhead = count_paths(rows_n, cols_n, board, i, j, endpoints_found);
+                int trailhead = count_paths(rows_n, cols_n, board, i, j);
                 printf("trilhead: %d\n", trailhead);
                 count += trailhead;
             }
