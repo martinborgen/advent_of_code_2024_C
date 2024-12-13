@@ -73,7 +73,7 @@ it is a single, very long line.)
 #include "file_reader.h"
 #include "vector.h"
 
-#define INPUTS_PATH "../inputs/day9_sample.txt"
+#define INPUTS_PATH "../inputs/day9.txt"
 
 // this struct will be used to represent fils.
 // Free space is represented using -1 as file ID
@@ -108,6 +108,34 @@ void print_deque(file_node *start)
         current = current->next;
     }
     printf("\n");
+}
+
+uint64_t calculate_checksum(file_node *node)
+{
+    uint64_t checksum = 0;
+
+    int index = 0;
+    while (node != NULL)
+    {
+        if (node->id >= 0)
+        {
+            int i;
+            for (i = 0; i < node->blocks; i++)
+            {
+                checksum += (i + index) * node->id;
+            }
+
+            index += i;
+        }
+        else
+        {
+            index += node->blocks;
+        }
+
+        node = node->next;
+    }
+
+    return checksum;
 }
 
 int main()
@@ -146,7 +174,7 @@ int main()
     current->next = NULL; // last datanode
 
     // print list.
-    print_deque(&deque_begin);
+    // print_deque(&deque_begin);
     current = NULL;
 
     // finding the first open space, then the last file
@@ -210,7 +238,7 @@ int main()
             }
         }
 
-        print_deque(&deque_begin);
+        // print_deque(&deque_begin);
 
         // make sure left is sitting on empty space
         left = left_start;
@@ -232,8 +260,10 @@ int main()
         }
     }
 
-    print_deque(&deque_begin);
+    // print_deque(&deque_begin);
     printf("\n");
+    uint64_t checksum = calculate_checksum(&deque_begin);
+    printf("Chekcsum pt 2 is: %lu\n", checksum);
 
     return 0;
 }
