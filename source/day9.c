@@ -73,7 +73,17 @@ it is a single, very long line.)
 #include "file_reader.h"
 #include "vector.h"
 
-#define INPUTS_PATH "../inputs/day9.txt"
+#define INPUTS_PATH "../inputs/day9_sample.txt"
+
+// this struct will be used to represent fils.
+// Free space is represented using -1 as file ID
+typedef struct file_node
+{
+    int id;
+    int blocks;
+    struct file_node *next;
+    struct file_node *prev;
+} file_node;
 
 int main()
 {
@@ -83,59 +93,69 @@ int main()
     input[input_len - 1] = '\0';
     input_len--;
 
-    struct int_vector file_unpacked = int_vector_new();
-    int_vector_set_capacity(&file_unpacked, input_len);
+    file_node deque_begin = {0, (int)input[0] - '0', NULL, NULL};
 
-    int filled = 0;
-
-    for (int i = 0; i < input_len; i += 2)
+    file_node *current = &deque_begin;
+    for (size_t i = 1; i < input_len - 1; i += 2)
     {
-        int file_blocks = input[i] - '0';
-        int free_blocks = input[i + 1] - '0';
-
-        for (int j = 0; j < file_blocks; j++)
+        if (input[i] - '0' > 0)
         {
-            int_vector_push_back(&file_unpacked, i / 2 + '0');
-            filled++;
+            // a free space node
+            current->next = malloc(sizeof(file_node));
+            current->next->prev = current;
+            current->next->id = -1;
+            current->next->blocks = input[i] - '0';
+
+            current = current->next;
         }
 
-        for (int j = 0; j < free_blocks; j++)
-        {
-            int_vector_push_back(&file_unpacked, '.');
-        }
+        // a data node
+        current->next = malloc(sizeof(file_node));
+        current->next->prev = current;
+        current->next->id = (i + 1) / 2;
+        current->next->blocks = input[i + 1] - '0';
+
+        current = current->next;
     }
+    file_node *deque_end = current;
+    current->next = NULL; // last datanode
 
-    int left = 0;
-    int right = file_unpacked.length - 1;
-    for (; file_unpacked.values[left] != '.'; left++)
+    // print list.
+    current = &deque_begin;
+    while (current != NULL)
+    {
+        if (current->id >= 0)
+        {
+            for (int j = 0; j < current->blocks; j++)
+            {
+                printf("%d", current->id);
+            }
+        }
+        else
+        {
+            for (int j = 0; j < current->blocks; j++)
+            {
+                printf("%c", '.');
+            }
+        }
+        current = current->next;
+    }
+    printf("\n");
+    current = NULL;
+
+    // compacting the drive
+    file_node *left = &deque_begin;
+    for (; left->id >= 0; left = left->next)
         ;
-    for (; file_unpacked.values[right] == '.'; right--)
+    file_node *left_start = left;
+
+    file_node *right = deque_end;
+    for (; right->id < 0; right = right->prev)
         ;
 
-    while (left < right)
-    {
+    // TODO: LOOP TO COMPACT FILE
 
-        file_unpacked.values[left] = file_unpacked.values[right];
-        file_unpacked.values[right] = '.';
-
-        for (; file_unpacked.values[left] != '.'; left++)
-            ;
-        for (; file_unpacked.values[right] == '.'; right--)
-            ;
-    }
-
-    uint64_t checksum = 0;
-    for (size_t i = 0; i < file_unpacked.length; i++)
-    {
-        if (file_unpacked.values[i] == '.')
-        {
-            break;
-        }
-
-        checksum += i * (file_unpacked.values[i] - '0');
-    }
-
-    printf("Checksum: %lu\n", checksum);
+    printf("\n");
 
     return 0;
 }
