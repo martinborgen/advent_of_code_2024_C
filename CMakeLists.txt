@@ -80,6 +80,7 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/source/day11.c
     ${PROJECT_SOURCE_DIR}/source/file_reader.c
     )
+target_link_libraries(day11 m)
 
 include(CTest)
 

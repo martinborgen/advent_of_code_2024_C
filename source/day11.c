@@ -77,10 +77,13 @@ have after blinking 25 times?
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "file_reader.h"
 
 #define INPUTS_PATH "../inputs/day11.txt"
+#define MAXIT 45
+#define PRE_HASHED 10
 
 typedef struct num_node
 {
@@ -122,31 +125,48 @@ bool split_digits(uint64_t n, uint64_t *a, uint64_t *b)
     return retval;
 }
 
-void update(num_node *node)
+uint64_t update(uint64_t num, uint32_t iterations, uint32_t maxit, uint64_t hash[PRE_HASHED][MAXIT])
 {
-    while (node != NULL)
+    uint64_t output = 0;
+    uint64_t digits = (uint64_t)(log10(num) + 1);
+
+    // recursive end
+    if (iterations == maxit - 1)
     {
-        uint64_t a;
-        uint64_t b;
-        if (node->num == 0)
+        if (num > 0 && digits % 2 == 0)
         {
-            node->num = 1;
-        }
-        else if (split_digits(node->num, &a, &b))
-        {
-            num_node *tmp_next = node->next;
-            node->num = a;
-            node->next = malloc(sizeof(num_node));
-            node = node->next;
-            node->next = tmp_next;
-            node->num = b;
+            // printf("%lu, returning 2\n", num);
+            return 2;
         }
         else
         {
-            node->num *= 2024;
+            // printf("%lu, returning 1\n", num);
+            return 1;
         }
-        node = node->next;
     }
+    else if (num < PRE_HASHED && hash != NULL)
+    {
+        return hash[num][iterations];
+    }
+
+    // recursive
+
+    if (num == 0)
+    {
+        output += update(1, iterations + 1, maxit, hash);
+    }
+    else if (digits % 2 == 0)
+    {
+        uint64_t a, b;
+        split_digits(num, &a, &b);
+        output += update(a, iterations + 1, maxit, hash);
+        output += update(b, iterations + 1, maxit, hash);
+    }
+    else
+    {
+        output += update(num * 2024, iterations + 1, maxit, hash);
+    }
+    return output;
 }
 
 int main()
@@ -169,25 +189,29 @@ int main()
     }
     current->next = NULL;
 
-    for (int i = 0; i < 25; i++)
+    uint64_t hash[PRE_HASHED][MAXIT];
+    for (int i = 0; i < 10; i++)
     {
-        update(&start);
+        for (int j = 0; j < MAXIT; j++)
+        {
+            hash[i][j] = update(i, j, MAXIT, NULL);
+        }
     }
 
-    // // print
-    // current = &start;
-    // while (current != NULL)
-    // {
-    //     printf("%d ", current->num);
-    //     current = current->next;
-    // }
-    // printf("\n");
-
-    uint32_t count = 0;
-    for (num_node *current = &start; current != NULL; current = current->next)
+    current = &start;
+    uint64_t count = 0;
+    while (current != NULL)
     {
-        count++;
+        if (current->num < PRE_HASHED)
+        {
+            count += hash[current->num][0];
+        }
+        else
+        {
+            count += update(current->num, 0, MAXIT, hash);
+        }
+        current = current->next;
     }
 
-    printf("%u\n", count);
+    printf("%lu\n", count);
 }
