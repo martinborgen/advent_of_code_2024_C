@@ -131,7 +131,7 @@ What is the total price of fencing all regions on your map?
 #include "file_reader.h"
 #include "my_string.h"
 
-#define INPUTS_PATH "../inputs/day12_sample.txt"
+#define INPUTS_PATH "../inputs/day12.txt"
 
 bool is_in_bounds(size_t x, size_t y, size_t xmax, size_t ymax)
 {
@@ -163,20 +163,10 @@ uint32_t count_inside_corners(size_t r, size_t c, size_t rows, size_t cols,
     // also contains the diagonal directions.
     for (int i = 0; i < 8; i += 2)
     {
-        // Probably the most hideous if-statement I've ever written.
-        // It's just to check that whatever direction we're looking in is in bounds.
-        if (r + x[i] >= 0 &&
-            c + y[i] >= 0 &&
-            r + x[i] < rows &&
-            c + y[i] < cols &&
-            r + x[i + 1] >= 0 &&
-            c + y[i + 1] >= 0 &&
-            r + x[i + 1] < rows &&
-            c + y[i + 1] < cols &&
-            r + x[i + 2] >= 0 &&
-            c + y[i + 2] >= 0 &&
-            r + x[i + 2] < rows &&
-            c + y[i + 2] < cols &&
+
+        if (is_in_bounds(r + x[i], c + y[i], rows, cols) &&
+            is_in_bounds(r + x[i + 1], c + y[i + 1], rows, cols) &&
+            is_in_bounds(r + x[i + 2], c + y[i + 2], rows, cols) &&
             board[r + x[i]][c + y[i]] == self &&
             board[r + x[i + 1]][c + y[i + 1]] != self &&
             board[r + x[i + 2]][c + y[i + 2]] == self)
@@ -209,37 +199,24 @@ uint32_t count_outside_corners(uint64_t r, uint64_t c, size_t rows, size_t cols,
     // loop through directions given by arrays x and y.
     for (int i = 0; i < 4; i++)
     {
-        // Probably the second most hideous if-statement I've ever written.
-        // It's just to check that whatever direction we're looking in is in bounds.
-        if (r + x[i] >= 0 &&
-            c + y[i] >= 0 &&
-            r + x[i] < rows &&
-            c + y[i] < cols &&
-            r + x[i + 1] >= 0 &&
-            c + y[i + 1] >= 0 &&
-            r + x[i + 1] < rows &&
-            c + y[i + 1] < cols &&
+
+        if (is_in_bounds(r + x[i], c + y[i], rows, cols) &&
+            is_in_bounds(r + x[i + 1], c + y[i + 1], rows, cols) &&
             board[r + x[i]][c + y[i]] != self &&
             board[r + x[i + 1]][c + y[i + 1]] != self)
         {
             outside_corners++;
         }
-        // row or col oob for x[i], y[i], but not for  [i + 1] dir => corner!
-        else if ((r + x[i] < 0 || r + x[i] >= rows || c + y[i] < 0 || c + y[i] >= rows) &&
-                 r + x[i + 1] >= 0 &&
-                 c + y[i + 1] >= 0 &&
-                 r + x[i + 1] <= rows - 1 &&
-                 c + y[i + 1] <= cols - 1 &&
+        else if (!is_in_bounds(r + x[i], c + y[i], rows, cols) &&
+                 is_in_bounds(r + x[i + 1], c + y[i + 1], rows, cols) &&
                  board[r + x[i + 1]][c + y[i + 1]] != self)
         {
             outside_corners++;
         }
-        else if ((r + x[i + 1] < 0 || r + x[i + 1] >= rows || c + y[i + 1] < 0 || c + y[i + 1] >= rows) &&
-                 r + x[i] >= 0 &&
-                 c + y[i] >= 0 &&
-                 r + x[i] <= rows - 1 &&
-                 c + y[i] <= cols - 1 &&
-                 board[r + x[i + 1]][c + y[i + 1]] != self)
+        else if (is_in_bounds(r + x[i], c + y[i], rows, cols) &&
+                 !is_in_bounds(r + x[i + 1], c + y[i + 1], rows, cols) &&
+                 board[r + x[i]][c + y[i]] != self)
+
         {
             outside_corners++;
         }
@@ -335,7 +312,7 @@ int main()
             uint32_t outside_corners = 0;
 
             explore(r, c, rows_n, cols_n, board, visited, &region_area, &inside_corners, &outside_corners);
-            uint32_t sides = 4 + 2 * inside_corners; // TODO: Change to use actual outside corners instead of 4
+            uint32_t sides = outside_corners + inside_corners; // TODO: Change to use actual outside corners instead of 4
             price += region_area * sides;
             printf("Region %c, with area %u and sides %u\n", board[r][c], region_area, sides);
         }
