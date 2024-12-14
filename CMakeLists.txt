@@ -119,3 +119,17 @@ add_executable(
   set_tests_properties(hash_table_test_build PROPERTIES FIXTURES_SETUP    test_fixture)
   add_test(hash_table_test hash_table_test)
   set_tests_properties(hash_table_test       PROPERTIES FIXTURES_REQUIRED test_fixture)
+
+  add_executable(
+    linalg_test 
+    test/linalg_test.c
+    source/my_linalg.c)
+    add_test(linalg_build
+    "${CMAKE_COMMAND}"
+    --build "${CMAKE_BINARY_DIR}"
+    --config "$<CONFIG>"
+    --target linalg_test
+  )
+  set_tests_properties(linalg_build PROPERTIES FIXTURES_SETUP    test_fixture)
+  add_test(linalg_test linalg_test)
+  set_tests_properties(linalg_test       PROPERTIES FIXTURES_REQUIRED test_fixture)
