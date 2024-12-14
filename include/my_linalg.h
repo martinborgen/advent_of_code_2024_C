@@ -1,9 +1,11 @@
 #ifndef _AOC_LINALG_H
 #define _AOC_LINALG_H
 
+#include <stdint.h>
+
 typedef struct quota
 {
-    int numerator, denominator;
+    int_fast64_t numerator, denominator;
 } quota;
 
 quota quota_mult(quota a, quota b);
