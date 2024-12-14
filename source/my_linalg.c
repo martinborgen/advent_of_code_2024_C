@@ -7,12 +7,20 @@
 quota quota_mult(quota a, quota b)
 {
     quota res = {a.numerator * b.numerator, a.denominator * b.denominator};
+    if (quota_is_int(res))
+    {
+        res = (quota){quota_icompute(res), 1};
+    }
     return res;
 }
 
 quota quota_div(quota a, quota b)
 {
     quota res = {a.numerator * b.denominator, a.denominator * b.numerator};
+    if (quota_is_int(res))
+    {
+        res = (quota){quota_icompute(res), 1};
+    }
     return res;
 }
 
@@ -20,6 +28,10 @@ quota quota_add(quota a, quota b)
 {
     quota res = {a.numerator * b.denominator + b.numerator * a.denominator,
                  a.denominator * b.denominator};
+    if (quota_is_int(res))
+    {
+        res = (quota){quota_icompute(res), 1};
+    }
     return res;
 }
 
@@ -27,6 +39,10 @@ quota quota_sub(quota a, quota b)
 {
     quota res = {a.numerator * b.denominator - b.numerator * a.denominator,
                  a.denominator * b.denominator};
+    if (quota_is_int(res))
+    {
+        res = (quota){quota_icompute(res), 1};
+    }
     return res;
 }
 
@@ -36,9 +52,9 @@ float quota_fcompute(quota q)
     return res;
 }
 
-int quota_icompute(quota q)
+int_fast64_t quota_icompute(quota q)
 {
-    int res = q.numerator / q.denominator;
+    int_fast64_t res = q.numerator / q.denominator;
     return res;
 }
 

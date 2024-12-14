@@ -73,10 +73,11 @@ would have to spend to win all possible prizes?
 #include "my_string.h"
 #include "my_linalg.h"
 
-#define INPUTS_PATH "../inputs/day13.txt"
+#define INPUTS_PATH "../inputs/day13_sample.txt"
 
 #define PRICE_A 3
 #define PRICE_B 1
+#define PART2_CORRECTION 10000000000000
 
 struct inputs_node
 {
@@ -131,8 +132,8 @@ int find_min_price(struct inputs_node *input)
     quota a21 = {input->ay, 1};
     quota a22 = {input->by, 1};
 
-    quota x1 = {input->prize_x, 1};
-    quota x2 = {input->prize_y, 1};
+    quota x1 = {input->prize_x * PART2_CORRECTION, 1};
+    quota x2 = {input->prize_y * PART2_CORRECTION, 1};
 
     // gaussing a 2x2 matrix
     // normalize first row
@@ -153,10 +154,10 @@ int find_min_price(struct inputs_node *input)
     x1 = quota_sub(x1, quota_mult(a12, x2));
     a12 = (quota){0, 0};
 
-    int a_presses = quota_icompute(x1);
-    int b_presses = quota_icompute(x2);
+    int_fast64_t a_presses = quota_icompute(x1);
+    int_fast64_t b_presses = quota_icompute(x2);
 
-    if (quota_is_int(x1) && quota_is_int(x2) && a_presses <= 100 && b_presses <= 100)
+    if (quota_is_int(x1) && quota_is_int(x2))
     {
         return a_presses * PRICE_A + b_presses * PRICE_B;
     }
