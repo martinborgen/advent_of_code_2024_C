@@ -83,6 +83,13 @@ add_executable(
     )
 target_link_libraries(day11 m)
 
+add_executable(
+    day12
+    ${PROJECT_SOURCE_DIR}/source/day12.c
+    ${PROJECT_SOURCE_DIR}/source/file_reader.c
+    ${PROJECT_SOURCE_DIR}/source/my_string.c
+)
+
 include(CTest)
 
 add_executable(
