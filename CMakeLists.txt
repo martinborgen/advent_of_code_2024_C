@@ -97,3 +97,17 @@ add_executable(
   set_tests_properties(test_build PROPERTIES FIXTURES_SETUP    test_fixture)
   add_test(vector_test vector_test)
   set_tests_properties(vector_test       PROPERTIES FIXTURES_REQUIRED test_fixture)
+
+  add_executable(
+    hash_table_test 
+    test/hash_table_test.c
+    source/my_hash_table.c)
+    add_test(hash_table_test_build
+    "${CMAKE_COMMAND}"
+    --build "${CMAKE_BINARY_DIR}"
+    --config "$<CONFIG>"
+    --target hash_table_test
+  )
+  set_tests_properties(hash_table_test_build PROPERTIES FIXTURES_SETUP    test_fixture)
+  add_test(hash_table_test hash_table_test)
+  set_tests_properties(hash_table_test       PROPERTIES FIXTURES_REQUIRED test_fixture)
