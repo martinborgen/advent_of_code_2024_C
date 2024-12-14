@@ -73,7 +73,7 @@ would have to spend to win all possible prizes?
 #include "my_string.h"
 #include "my_linalg.h"
 
-#define INPUTS_PATH "../inputs/day13_sample.txt"
+#define INPUTS_PATH "../inputs/day13.txt"
 
 #define PRICE_A 3
 #define PRICE_B 1
@@ -136,22 +136,51 @@ int find_min_price(struct inputs_node *input)
 
     // gaussing a 2x2 matrix
     // normalize first row
-    a11.numerator = 1;
-    a22.denominator = a11.numerator;
-    x1.denominator = a11.numerator;
+    a12 = quota_div(a12, a11);
+    x1 = quota_div(x1, a11);
+    a11 = (quota){1, 1};
 
-    // subtract a21.numerator * first row from second.
-    a22.numerator = a22.numerator * a12.denominator - a21.numerator * a12.numerator;
-    a22.denominator *= a12.denominator;
+    // subtract a21 * first row from second row.
+    a22 = quota_sub(a22, quota_mult(a21, a12));
+    x2 = quota_sub(x2, quota_mult(a21, x1));
+    a21 = (quota){0, 0};
 
-    x2.numerator *= x1.denominator;
-    x2.numerator -= a21.numerator * x1.numerator;
-    a21.numerator = 0;
+    // normalize second row
+    x2 = quota_div(x2, a22);
+    a22 = (quota){1, 1};
+
+    // subtract a22 * second row from first row.
+    x1 = quota_sub(x1, quota_mult(a12, x2));
+    a12 = (quota){0, 0};
+
+    int a_presses = quota_icompute(x1);
+    int b_presses = quota_icompute(x2);
+
+    if (quota_is_int(x1) && quota_is_int(x2) && a_presses <= 100 && b_presses <= 100)
+    {
+        return a_presses * PRICE_A + b_presses * PRICE_B;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 int main()
 {
+    uint32_t tokens = 0;
     struct inputs_node *inputs = read_inputs(INPUTS_PATH);
-    int testres = find_min_price(inputs);
-    printf("%d\n", testres);
+    for (struct inputs_node *current = inputs; current != NULL; current = current->next)
+    {
+        printf("Button A: X+%d, Y+%d\nButton B: X+%d, Y+%d\nPrize: X=%d, Y=%d\n\n",
+               current->ax, current->ay, current->bx, current->by, current->prize_x, current->prize_y);
+
+        int testres = find_min_price(current);
+        printf("%d\n", testres);
+
+        tokens += testres;
+    }
+
+    printf("TOTAL TOKENS: %u\n", tokens);
+    return 0;
 }
