@@ -132,8 +132,8 @@ int find_min_price(struct inputs_node *input)
     quota a21 = {input->ay, 1};
     quota a22 = {input->by, 1};
 
-    quota x1 = {input->prize_x * PART2_CORRECTION, 1};
-    quota x2 = {input->prize_y * PART2_CORRECTION, 1};
+    quota x1 = {input->prize_x + PART2_CORRECTION, 1};
+    quota x2 = {input->prize_y + PART2_CORRECTION, 1};
 
     // gaussing a 2x2 matrix
     // normalize first row
