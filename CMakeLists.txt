@@ -79,6 +79,7 @@ add_executable(
     day11
     ${PROJECT_SOURCE_DIR}/source/day11.c
     ${PROJECT_SOURCE_DIR}/source/file_reader.c
+    ${PROJECT_SOURCE_DIR}/source/my_hash_table.c
     )
 target_link_libraries(day11 m)
 
@@ -88,13 +89,13 @@ add_executable(
     vector_test 
     test/vector_test.c
     source/vector.c)
-    add_test(test_build
+    add_test(vector_test_build
     "${CMAKE_COMMAND}"
     --build "${CMAKE_BINARY_DIR}"
     --config "$<CONFIG>"
     --target vector_test
   )
-  set_tests_properties(test_build PROPERTIES FIXTURES_SETUP    test_fixture)
+  set_tests_properties(vector_test_build PROPERTIES FIXTURES_SETUP    test_fixture)
   add_test(vector_test vector_test)
   set_tests_properties(vector_test       PROPERTIES FIXTURES_REQUIRED test_fixture)
 

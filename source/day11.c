@@ -80,10 +80,12 @@ have after blinking 25 times?
 #include <math.h>
 
 #include "file_reader.h"
+#include "my_hash_table.h"
 
 #define INPUTS_PATH "../inputs/day11.txt"
-#define MAXIT 45
-#define PRE_HASHED 10
+#define MAXIT 75
+
+#define HASH_TABLE_ROWS 1000081
 
 typedef struct num_node
 {
@@ -125,7 +127,11 @@ bool split_digits(uint64_t n, uint64_t *a, uint64_t *b)
     return retval;
 }
 
-uint64_t update(uint64_t num, uint32_t iterations, uint32_t maxit, uint64_t hash[PRE_HASHED][MAXIT])
+uint64_t update(uint64_t num,
+                uint64_t iterations,
+                uint32_t maxit,
+                hash_node **hash_table,
+                size_t hash_table_rows)
 {
     uint64_t output = 0;
     uint64_t digits = (uint64_t)(log10(num) + 1);
@@ -144,28 +150,40 @@ uint64_t update(uint64_t num, uint32_t iterations, uint32_t maxit, uint64_t hash
             return 1;
         }
     }
-    else if (num < PRE_HASHED && hash != NULL)
+
+    // hash check. Iterations are stored as the first byte of the u64.
+    uint64_t key = (iterations << 56) + num;
+    output = hash_map_get(key, hash_table_rows, hash_table);
+    if (output > 0)
     {
-        return hash[num][iterations];
+        return output;
+    }
+    else
+    {
+        output = 0;
     }
 
+    uint64_t res = 0;
     // recursive
-
     if (num == 0)
     {
-        output += update(1, iterations + 1, maxit, hash);
+        res += update(1, iterations + 1, maxit, hash_table, hash_table_rows);
     }
     else if (digits % 2 == 0)
     {
         uint64_t a, b;
         split_digits(num, &a, &b);
-        output += update(a, iterations + 1, maxit, hash);
-        output += update(b, iterations + 1, maxit, hash);
+        res += update(a, iterations + 1, maxit, hash_table, hash_table_rows);
+        res += update(b, iterations + 1, maxit, hash_table, hash_table_rows);
     }
     else
     {
-        output += update(num * 2024, iterations + 1, maxit, hash);
+        res += update(num * 2024, iterations + 1, maxit, hash_table, hash_table_rows);
     }
+
+    key = (iterations << 56) + num;
+    hash_map_insert(key, res, hash_table_rows, hash_table);
+    output += res;
     return output;
 }
 
@@ -173,8 +191,8 @@ int main()
 {
     char *input = file_reader(INPUTS_PATH);
 
+    // make linked list with starting numbers
     num_node start = {0, NULL};
-
     char *token;
     token = strtok(input, " ");
     start.num = atoi(token);
@@ -189,27 +207,19 @@ int main()
     }
     current->next = NULL;
 
-    uint64_t hash[PRE_HASHED][MAXIT];
-    for (int i = 0; i < 10; i++)
+    const size_t hash_table_rows = HASH_TABLE_ROWS;
+    // prepare a hash table for holding computed values
+    hash_node **hash_table = malloc(sizeof(hash_node *) * hash_table_rows);
+    for (int i = 0; i < hash_table_rows; i++)
     {
-        for (int j = 0; j < MAXIT; j++)
-        {
-            hash[i][j] = update(i, j, MAXIT, NULL);
-        }
+        hash_table[i] = NULL;
     }
 
     current = &start;
     uint64_t count = 0;
     while (current != NULL)
     {
-        if (current->num < PRE_HASHED)
-        {
-            count += hash[current->num][0];
-        }
-        else
-        {
-            count += update(current->num, 0, MAXIT, hash);
-        }
+        count += update(current->num, 0, MAXIT, hash_table, hash_table_rows);
         current = current->next;
     }
 
