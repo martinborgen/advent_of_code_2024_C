@@ -212,6 +212,37 @@ void calculate_bot_pos(bot *botlist, size_t botlist_len, int32_t seconds, size_t
     }
 }
 
+int count_safety_factor(bot *botlist, size_t botlist_len, size_t tiles_w, size_t tiles_h)
+{
+    int q1 = 0, q2 = 0, q3 = 0, q4 = 0;
+    int output = 0;
+    for (size_t i = 0; i < botlist_len; i++)
+    {
+        bot *b = &botlist[i];
+        if (b->px < tiles_w / 2 && b->py < tiles_h / 2)
+        {
+            q1++;
+        }
+
+        if (b->px > tiles_w / 2 && b->py < tiles_h / 2)
+        {
+            q2++;
+        }
+
+        if (b->px < tiles_w / 2 && b->py > tiles_h / 2)
+        {
+            q3++;
+        }
+
+        if (b->px > tiles_w / 2 && b->py > tiles_h / 2)
+        {
+            q4++;
+        }
+    }
+
+    return q1 * q2 * q3 * q4;
+}
+
 void print_bots(bot *botlist, size_t botlist_len, size_t tiles_w, size_t tiles_h)
 {
     int(*board)[tiles_w] = malloc(sizeof(*board) * tiles_h);
@@ -257,9 +288,13 @@ int main()
     calculate_bot_pos(botlist, botlist_len, 100, TILES_WIDTH, TILES_HEIGHT);
     print_bots(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
 
+    int safety_factor = count_safety_factor(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
+
     for (size_t i = 0; i < botlist_len; i++)
     {
         printf("p=%d,%d v=%d,%d\n", botlist[i].px, botlist[i].py, botlist[i].vx, botlist[i].vy);
     }
+
+    printf("\n Safety Factor: %d\n", safety_factor);
     return 0;
 }
