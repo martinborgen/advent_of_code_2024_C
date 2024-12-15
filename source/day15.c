@@ -273,6 +273,43 @@ coordinates is 10092. In the smaller example, the sum is 2028.
 
 Predict the motion of the robot and boxes in the warehouse. After the robot is
 finished moving, what is the sum of all boxes' GPS coordinates?
+
+PART 2 The lanternfish use your information to find a safe moment to swim in and
+turn off the malfunctioning robot! Just as they start preparing a festival in
+your honor, reports start coming in that a second warehouse's robot is also
+malfunctioning.
+
+This warehouse's layout is surprisingly similar to the one you just helped.
+There is one key difference: everything except the robot is twice as wide! The
+robot's list of movements doesn't change.
+
+To get the wider warehouse's map, start with your original map and, for each
+tile, make the following changes:
+
+    If the tile is #, the new map contains ## instead.
+    If the tile is O, the new map contains [] instead.
+    If the tile is ., the new map contains .. instead.
+    If the tile is @, the new map contains @. instead.
+
+This will produce a new warehouse map which is twice as wide and with wide boxes
+that are represented by []. (The robot does not change size.)
+
+The larger example from before would now look like this:
+
+####################
+##....[]....[]..[]##
+##............[]..##
+##..[][]....[]..[]##
+##....[]@.....[]..##
+##[]##....[]......##
+##[]....[]....[]..##
+##..[][]..[]..[][]##
+##........[]......##
+####################
+
+Because boxes are now twice as wide but the robot is still the same size and
+speed, boxes can be aligned such that they directly push two other boxes at
+once.
 */
 
 #include <stdbool.h>
@@ -389,6 +426,36 @@ int compute_coordinate_sum(size_t board_rows, size_t board_cols, char board[boar
     return sum;
 }
 
+// doubles the board with according to the spec.
+// NOTE! board_cols must be board 1 cols, not board 2!
+void double_board_width(size_t board_rows, size_t board_cols,
+                        char board[board_rows][board_cols],
+                        char board2[board_rows][2 * board_cols])
+{
+    for (size_t r = 0; r < board_rows; r++)
+    {
+        for (size_t c = 0; c < board_cols; c++)
+        {
+            char tile = board[r][c];
+            if (tile == '@')
+            {
+                board2[r][2 * c] = '@';
+                board2[r][(2 * c) + 1] = '.';
+            }
+            else if (tile == 'O')
+            {
+                board2[r][2 * c] = '[';
+                board2[r][(2 * c) + 1] = ']';
+            }
+            else
+            {
+                board2[r][2 * c] = tile;
+                board2[r][(2 * c) + 1] = tile;
+            }
+        }
+    }
+}
+
 int main()
 {
     char *inputs0 = file_reader(INPUTS0_PATH);
@@ -415,7 +482,14 @@ int main()
 
     int coord_sum = compute_coordinate_sum(rows_n, cols_n, board);
 
-    printf("Coordinate sum: %d\n", coord_sum);
+    printf("Par 1. Coordinate sum: %d\n", coord_sum);
+
+    size_t rows2_n = rows_n;
+    size_t cols2_n = 2 * cols_n;
+    char(*board2)[cols2_n] = malloc(sizeof(*board2) * rows2_n);
+
+    double_board_width(rows_n, cols_n, board, board2);
+    print_board(rows2_n, cols2_n, board2);
 
     free(movement);
     return 0;
