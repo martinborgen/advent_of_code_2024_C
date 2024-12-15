@@ -163,10 +163,10 @@ seconds have elapsed?
 #include "file_reader.h"
 #include "my_string.h"
 
-#define INPUTS_PATH "../inputs/day14_sample.txt"
+#define INPUTS_PATH "../inputs/day14.txt"
 
-#define TILES_WIDTH 11
-#define TILES_HEIGHT 7
+#define TILES_WIDTH 101
+#define TILES_HEIGHT 103
 
 typedef struct bot
 {
