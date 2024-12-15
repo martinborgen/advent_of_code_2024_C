@@ -169,7 +169,7 @@ seconds have elapsed?
 #define TILES_WIDTH 101
 #define TILES_HEIGHT 103
 
-#define PART2_MAX_T 1000000
+#define PART2_MAX_T 100000
 
 typedef struct bot
 {
@@ -244,7 +244,7 @@ void count_quadrants(bot *botlist, size_t botlist_len, size_t tiles_w, size_t ti
     }
 }
 
-void print_bots(bot *botlist, size_t botlist_len, size_t tiles_w, size_t tiles_h)
+void print_board(bot *botlist, size_t botlist_len, size_t tiles_w, size_t tiles_h)
 {
     int(*board)[tiles_w] = malloc(sizeof(*board) * tiles_h);
 
@@ -429,7 +429,7 @@ void find_anomaly()
             time_min_ent = t;
         }
 
-        // print_bots(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
+        // print_board(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
         // printf("\n");
     }
 
@@ -439,7 +439,7 @@ void find_anomaly()
 
     calculate_bot_pos(botlist, botlist_len, time_min_ent, TILES_WIDTH, TILES_HEIGHT);
 
-    print_bots(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
+    print_board(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
 
     free(botlist);
     free(botlist_original);
@@ -451,7 +451,7 @@ int main()
     bot *botlist = read_input(INPUTS_PATH, &botlist_len);
 
     calculate_bot_pos(botlist, botlist_len, 100, TILES_WIDTH, TILES_HEIGHT);
-    print_bots(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
+    print_board(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
 
     int q1 = 0, q2 = 0, q3 = 0, q4 = 0;
     count_quadrants(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT, &q1, &q2, &q3, &q4);
