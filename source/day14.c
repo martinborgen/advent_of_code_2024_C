@@ -159,6 +159,7 @@ seconds have elapsed?
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "file_reader.h"
 #include "my_string.h"
@@ -167,6 +168,8 @@ seconds have elapsed?
 
 #define TILES_WIDTH 101
 #define TILES_HEIGHT 103
+
+#define PART2_MAX_T 1000000
 
 typedef struct bot
 {
@@ -279,6 +282,108 @@ void print_bots(bot *botlist, size_t botlist_len, size_t tiles_w, size_t tiles_h
     printf("\n");
 }
 
+// attempt att using variance to find anomaly
+int count_variance(bot *botlist, size_t botlist_len, size_t tiles_w, size_t tiles_h)
+{
+    int q1 = 0, q2 = 0, q3 = 0, q4 = 0;
+    count_quadrants(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT, &q1, &q2, &q3, &q4);
+
+    int average = (q1 + q2 + q3 + q4) / 4;
+    int variance = pow(q1 - average, 2) + pow(q2 - average, 2) + pow(q3 - average, 2) + pow(q4 - average, 2);
+
+    return variance;
+}
+
+// presumably an anomaly will involve many bots in close proximity
+int count_adjecant(bot *botlist, size_t botlist_len, size_t tiles_w, size_t tiles_h)
+{
+    int(*board)[tiles_w] = malloc(sizeof(*board) * tiles_h);
+    int adjecants = 0;
+    for (int i = 0; i < tiles_h; i++)
+    {
+        for (int j = 0; j < tiles_w; j++)
+        {
+            board[i][j] = 0;
+        }
+    }
+
+    for (int i = 0; i < botlist_len; i++)
+    {
+        bot *b = &botlist[i];
+        board[b->py][b->px]++;
+    }
+
+    for (int i = 1; i < tiles_h; i++)
+    {
+        for (int j = 1; j < tiles_w; j++)
+        {
+            if (board[i][j] > 0 && board[i - 1][j] > 0)
+            {
+                adjecants += board[i - 1][j];
+            }
+
+            if (board[i][j] > 0 && board[i][j - 1] > 0)
+            {
+                adjecants += board[i][j - 1];
+            }
+
+            if (board[i][j] > 0 && board[i - 1][j - 1] > 0)
+            {
+                adjecants += board[i - 1][j - 1];
+            }
+        }
+    }
+    free(board);
+    return adjecants;
+}
+
+void find_anomaly()
+{
+    uint64_t max_variance = 0;
+    uint64_t time_for_max_e = 0;
+
+    uint64_t max_adj = 0;
+    uint64_t time_max_adj = 0;
+
+    size_t botlist_len = 0;
+    bot *botlist_original = read_input(INPUTS_PATH, &botlist_len);
+    bot *botlist = malloc(sizeof(bot) * botlist_len);
+
+    for (int t = 0; t < PART2_MAX_T; t++)
+    {
+        memcpy(botlist, botlist_original, botlist_len);
+
+        calculate_bot_pos(botlist, botlist_len, t, TILES_WIDTH, TILES_HEIGHT);
+
+        int e = count_variance(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
+        if (e > max_variance)
+        {
+            max_variance = e;
+            time_for_max_e = t;
+        }
+
+        int a = count_adjecant(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
+        if (a > max_adj)
+        {
+            max_adj = a;
+            time_max_adj = t;
+        }
+        print_bots(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
+        printf("\n");
+    }
+
+    printf("Max adj is: %lu at time %lu\n", max_adj, time_max_adj);
+
+    memcpy(botlist, botlist_original, botlist_len);
+
+    calculate_bot_pos(botlist, botlist_len, time_for_max_e, TILES_WIDTH, TILES_HEIGHT);
+
+    print_bots(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
+
+    free(botlist);
+    free(botlist_original);
+}
+
 int main()
 {
     size_t botlist_len = 0;
@@ -297,5 +402,7 @@ int main()
     }
 
     printf("\n Safety Factor: %d\n", safety_factor);
+
+    find_anomaly();
     return 0;
 }
