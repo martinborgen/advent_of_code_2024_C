@@ -291,7 +291,7 @@ void print_board(bot *botlist, size_t botlist_len, size_t tiles_w, size_t tiles_
 }
 
 // calculate information entropy
-float count_entropy(bot *botlist, size_t botlist_len, size_t tiles_w, size_t tiles_h)
+float count_entropy_count(bot *botlist, size_t botlist_len, size_t tiles_w, size_t tiles_h)
 {
     float entropy = 0;
 
@@ -339,6 +339,50 @@ float count_entropy(bot *botlist, size_t botlist_len, size_t tiles_w, size_t til
     free(board);
     free(bins);
     return entropy;
+}
+
+// a different entropy calculation, where the x, y pos are evaluated. A pattern ought to be fairly close.
+float count_entropy_pos(bot *botlist, size_t botlist_len, size_t tiles_w, size_t tiles_h)
+{
+    float entropy_x = 0;
+    float entropy_y = 0;
+
+    int *bins_x = calloc(botlist_len, sizeof(int) * botlist_len);
+    int *bins_y = calloc(botlist_len, sizeof(int) * botlist_len);
+
+    for (int i = 0; i < botlist_len; i++)
+    {
+        bot *b = &botlist[i];
+        bins_x[b->px]++;
+        bins_y[b->py]++;
+    }
+
+    int bins_x_sum = 0;
+    int bins_y_sum = 0;
+    for (int i = 0; i < botlist_len; i++)
+    {
+        bins_x_sum += bins_x[i];
+        bins_y_sum += bins_y[i];
+    }
+
+    for (int i = 0; i < botlist_len; i++)
+    {
+        if (bins_x[i] > 0)
+        {
+            float prob_x = (float)bins_x[i] / (float)bins_x_sum;
+            entropy_x -= prob_x * log2f(prob_x);
+        }
+
+        if (bins_y[i] > 0)
+        {
+            float prob_y = (float)bins_y[i] / (float)bins_y_sum;
+            entropy_y -= prob_y * log2f(prob_y);
+        }
+    }
+
+    free(bins_x);
+    free(bins_y);
+    return (entropy_x + entropy_y) / 2;
 }
 
 // attempt att using variance to find anomaly
@@ -400,7 +444,7 @@ void find_anomaly()
 {
     uint64_t max_variance = 0;
     uint64_t time_for_max_e = 0;
-    float min_entropy = 1;
+    float min_entropy = __FLT32_MAX__;
 
     uint64_t max_adj = 0;
     uint64_t time_max_adj = 0;
