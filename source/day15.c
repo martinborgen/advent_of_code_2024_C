@@ -284,8 +284,8 @@ finished moving, what is the sum of all boxes' GPS coordinates?
 #include "file_reader.h"
 #include "my_string.h"
 
-#define INPUTS0_PATH "../inputs/day15_sample2.txt"
-#define INPUTS1_PATH "../inputs/day15_sample3.txt"
+#define INPUTS0_PATH "../inputs/day15_0.txt"
+#define INPUTS1_PATH "../inputs/day15_1.txt"
 
 void print_board(size_t board_rows, size_t board_cols, char board[board_rows][board_cols]);
 
@@ -357,7 +357,6 @@ void process_movements(char *movements, size_t board_rows, size_t board_cols,
         default:
             break;
         }
-        print_board(board_rows, board_cols, board);
     }
 }
 
