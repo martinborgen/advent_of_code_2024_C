@@ -282,6 +282,57 @@ void print_bots(bot *botlist, size_t botlist_len, size_t tiles_w, size_t tiles_h
     printf("\n");
 }
 
+// calculate information entropy
+float count_entropy(bot *botlist, size_t botlist_len, size_t tiles_w, size_t tiles_h)
+{
+    float entropy = 0;
+
+    int *bins = calloc(botlist_len, sizeof(int) * botlist_len);
+
+    int(*board)[tiles_w] = malloc(sizeof(*board) * tiles_h);
+    for (int i = 0; i < tiles_h; i++)
+    {
+        for (int j = 0; j < tiles_w; j++)
+        {
+            board[i][j] = 0;
+        }
+    }
+
+    for (int i = 0; i < botlist_len; i++)
+    {
+        bot *b = &botlist[i];
+        board[b->py][b->px]++;
+    }
+
+    for (int i = 1; i < tiles_h; i++)
+    {
+        for (int j = 1; j < tiles_w; j++)
+        {
+            int count = board[i][j];
+            bins[count]++;
+        }
+    }
+
+    int bins_sum = 0;
+    for (int i = 0; i < botlist_len; i++)
+    {
+        bins_sum += bins[i];
+    }
+
+    for (int i = 0; i < botlist_len; i++)
+    {
+        if (bins[i] > 0)
+        {
+            float prob = (float)bins[i] / (float)bins_sum;
+            entropy -= prob * log2f(prob);
+        }
+    }
+
+    free(board);
+    free(bins);
+    return entropy;
+}
+
 // attempt att using variance to find anomaly
 int count_variance(bot *botlist, size_t botlist_len, size_t tiles_w, size_t tiles_h)
 {
@@ -341,9 +392,11 @@ void find_anomaly()
 {
     uint64_t max_variance = 0;
     uint64_t time_for_max_e = 0;
+    float min_entropy = 1;
 
     uint64_t max_adj = 0;
     uint64_t time_max_adj = 0;
+    uint64_t time_min_ent = 0;
 
     size_t botlist_len = 0;
     bot *botlist_original = read_input(INPUTS_PATH, &botlist_len);
@@ -355,28 +408,36 @@ void find_anomaly()
 
         calculate_bot_pos(botlist, botlist_len, t, TILES_WIDTH, TILES_HEIGHT);
 
-        int e = count_variance(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
-        if (e > max_variance)
+        // int e = count_variance(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
+        // if (e > max_variance)
+        // {
+        //     max_variance = e;
+        //     time_for_max_e = t;
+        // }
+
+        // int a = count_adjecant(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
+        // if (a > max_adj)
+        // {
+        //     max_adj = a;
+        //     time_max_adj = t;
+        // }
+
+        float ent = count_entropy(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
+        if (ent < min_entropy)
         {
-            max_variance = e;
-            time_for_max_e = t;
+            min_entropy = ent;
+            time_min_ent = t;
         }
 
-        int a = count_adjecant(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
-        if (a > max_adj)
-        {
-            max_adj = a;
-            time_max_adj = t;
-        }
-        print_bots(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
-        printf("\n");
+        // print_bots(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
+        // printf("\n");
     }
 
-    printf("Max adj is: %lu at time %lu\n", max_adj, time_max_adj);
+    printf("Min ent is: %f at time %lu\n", min_entropy, time_min_ent);
 
     memcpy(botlist, botlist_original, botlist_len);
 
-    calculate_bot_pos(botlist, botlist_len, time_for_max_e, TILES_WIDTH, TILES_HEIGHT);
+    calculate_bot_pos(botlist, botlist_len, time_min_ent, TILES_WIDTH, TILES_HEIGHT);
 
     print_bots(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
 

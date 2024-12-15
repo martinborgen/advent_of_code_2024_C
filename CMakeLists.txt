@@ -105,6 +105,7 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/source/file_reader.c
     ${PROJECT_SOURCE_DIR}/source/my_string.c
 )
+target_link_libraries(day14 m)
 
 include(CTest)
 
