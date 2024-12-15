@@ -27,6 +27,7 @@ char *file_reader(const char *filename)
     }
 
     fread(output, file_length, 1, file_ptr);
+    output[file_length] = '\0';
     fclose(file_ptr);
 
     return output;
