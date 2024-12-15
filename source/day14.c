@@ -244,6 +244,14 @@ void count_quadrants(bot *botlist, size_t botlist_len, size_t tiles_w, size_t ti
     }
 }
 
+void print_bots(bot *botlist, size_t botlist_len)
+{
+    for (size_t i = 0; i < botlist_len; i++)
+    {
+        printf("p=%d,%d v=%d,%d\n", botlist[i].px, botlist[i].py, botlist[i].vx, botlist[i].vy);
+    }
+}
+
 void print_board(bot *botlist, size_t botlist_len, size_t tiles_w, size_t tiles_h)
 {
     int(*board)[tiles_w] = malloc(sizeof(*board) * tiles_h);
@@ -433,12 +441,11 @@ void find_anomaly()
         // printf("\n");
     }
 
-    printf("Min ent is: %f at time %lu\n", min_entropy, time_min_ent);
-
     memcpy(botlist, botlist_original, botlist_len);
 
     calculate_bot_pos(botlist, botlist_len, time_min_ent, TILES_WIDTH, TILES_HEIGHT);
-
+    print_bots(botlist, botlist_len);
+    printf("Min ent is: %f at time %lu\n", min_entropy, time_min_ent);
     print_board(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
 
     free(botlist);
@@ -457,10 +464,7 @@ int main()
     count_quadrants(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT, &q1, &q2, &q3, &q4);
     int safety_factor = q1 * q2 * q3 * q4;
 
-    for (size_t i = 0; i < botlist_len; i++)
-    {
-        printf("p=%d,%d v=%d,%d\n", botlist[i].px, botlist[i].py, botlist[i].vx, botlist[i].vy);
-    }
+    print_bots(botlist, botlist_len);
 
     printf("\n Safety Factor: %d\n", safety_factor);
 
