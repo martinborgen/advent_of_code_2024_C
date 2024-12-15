@@ -523,9 +523,12 @@ int main()
     }
     free(inputs0);
     inputs0 = NULL;
+    size_t rows2_n = rows_n;
+    size_t cols2_n = 2 * cols_n;
+    char(*board2)[cols2_n] = malloc(sizeof(*board2) * rows2_n);
+    double_board_width(rows_n, cols_n, board, board2);
 
     char *movement = file_reader(INPUTS1_PATH);
-
     process_movements(movement, rows_n, cols_n, board);
 
     print_board(rows_n, cols_n, board);
@@ -534,13 +537,11 @@ int main()
 
     printf("Par 1. Coordinate sum: %d\n", coord_sum);
 
-    size_t rows2_n = rows_n;
-    size_t cols2_n = 2 * cols_n;
-    char(*board2)[cols2_n] = malloc(sizeof(*board2) * rows2_n);
-
-    double_board_width(rows_n, cols_n, board, board2);
     print_board(rows2_n, cols2_n, board2);
+    process_movements(movement, rows2_n, cols2_n, board2);
 
+    int coord_sum2 = compute_coordinate_sum(rows2_n, cols2_n, board2);
+    printf("Part 2. Coordinate sum: %d\n", coord_sum2);
     free(movement);
     return 0;
 }
