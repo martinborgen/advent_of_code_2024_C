@@ -216,7 +216,6 @@ void count_quadrants(bot *botlist, size_t botlist_len, size_t tiles_w, size_t ti
                      int *q1, int *q2, int *q3, int *q4)
 {
     // int q1 = 0, q2 = 0, q3 = 0, q4 = 0;
-    int output = 0;
     for (size_t i = 0; i < botlist_len; i++)
     {
         bot *b = &botlist[i];
@@ -276,6 +275,7 @@ void print_bots(bot *botlist, size_t botlist_len, size_t tiles_w, size_t tiles_h
         }
         printf("\n");
     }
+    free(board);
     printf("\n");
 }
 
