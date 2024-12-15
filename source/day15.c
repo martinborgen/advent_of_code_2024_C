@@ -284,24 +284,33 @@ finished moving, what is the sum of all boxes' GPS coordinates?
 #include "file_reader.h"
 #include "my_string.h"
 
-#define INPUTS0_PATH "../inputs/day15_sample0.txt"
-#define INPUTS1_PATH "../inputs/day15_sample1.txt"
+#define INPUTS0_PATH "../inputs/day15_sample2.txt"
+#define INPUTS1_PATH "../inputs/day15_sample3.txt"
+
+void print_board(size_t board_rows, size_t board_cols, char board[board_rows][board_cols]);
 
 // attempts to move a unit on the board. returns true if successful, false otherwise.
-void move(size_t r, size_t c,
+void move(size_t *rp, size_t *cp,
           int r_dir, int c_dir,
           size_t board_rows, size_t board_cols, char board[board_rows][board_cols])
 {
+    size_t r = *rp;
+    size_t c = *cp;
     char ahead = board[r + r_dir][c + c_dir];
     if (ahead == 'O')
     {
-        move(r + r_dir, c + c_dir, r_dir, c_dir, board_rows, board_cols, board);
+        size_t rtmp = r + r_dir;
+        size_t ctmp = c + c_dir;
+        move(&rtmp, &ctmp, r_dir, c_dir, board_rows, board_cols, board);
     }
 
+    ahead = board[r + r_dir][c + c_dir];
     if (ahead == '.') // not else if because we want stuff ahead to move first if possible
     {
         board[r + r_dir][c + c_dir] = board[r][c];
         board[r][c] = '.';
+        *rp = r + r_dir;
+        *cp = c + c_dir;
     }
     // other cases of char is no-op
 }
@@ -330,24 +339,25 @@ void process_movements(char *movements, size_t board_rows, size_t board_cols,
         switch (c = *cp)
         {
         case '^':
-            move(bot_r, bot_c, -1, 0, board_rows, board_cols, board);
+            move(&bot_r, &bot_c, -1, 0, board_rows, board_cols, board);
             break;
 
         case '<':
-            move(bot_r, bot_c, 0, -1, board_rows, board_cols, board);
+            move(&bot_r, &bot_c, 0, -1, board_rows, board_cols, board);
             break;
 
         case '>':
-            move(bot_r, bot_c, 0, 1, board_rows, board_cols, board);
+            move(&bot_r, &bot_c, 0, 1, board_rows, board_cols, board);
             break;
 
         case 'v':
-            move(bot_r, bot_c, 1, 0, board_rows, board_cols, board);
+            move(&bot_r, &bot_c, 1, 0, board_rows, board_cols, board);
             break;
 
         default:
             break;
         }
+        print_board(board_rows, board_cols, board);
     }
 }
 
@@ -385,6 +395,8 @@ int main()
     char *movement = file_reader(INPUTS1_PATH);
 
     process_movements(movement, rows_n, cols_n, board);
+
+    print_board(rows_n, cols_n, board);
 
     free(movement);
     return 0;
