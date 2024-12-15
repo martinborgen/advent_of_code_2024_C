@@ -287,18 +287,38 @@ finished moving, what is the sum of all boxes' GPS coordinates?
 #define INPUTS0_PATH "../inputs/day15_sample0.txt"
 #define INPUTS1_PATH "../inputs/day15_sample1.txt"
 
-void process_movements(char *movements, size_t board_rows, size_t board_cols, char board[board_rows][board_cols])
+// attempts to move a unit on the board. returns true if successful, false otherwise.
+void move(size_t r, size_t c,
+          int r_dir, int c_dir,
+          size_t board_rows, size_t board_cols, char board[board_rows][board_cols])
+{
+    char ahead = board[r + r_dir][c + c_dir];
+    if (ahead == 'O')
+    {
+        move(r + r_dir, c + c_dir, r_dir, c_dir, board_rows, board_cols, board);
+    }
+
+    if (ahead == '.') // not else if because we want stuff ahead to move first if possible
+    {
+        board[r + r_dir][c + c_dir] = board[r][c];
+        board[r][c] = '.';
+    }
+    // other cases of char is no-op
+}
+
+void process_movements(char *movements, size_t board_rows, size_t board_cols,
+                       char board[board_rows][board_cols])
 {
     // find start
-    size_t start_r, start_c;
+    size_t bot_r, bot_c;
     for (size_t r = 0; r < board_rows; r++)
     {
         for (size_t c = 0; c < board_cols; c++)
         {
             if (board[r][c] == '@')
             {
-                start_r = r;
-                start_c = c;
+                bot_r = r;
+                bot_c = c;
             }
         }
     }
@@ -306,34 +326,42 @@ void process_movements(char *movements, size_t board_rows, size_t board_cols, ch
     // process moves
     for (char *cp = movements; *cp != '\0'; cp++)
     {
-        char c = *cp;
-        if (c == '\n')
-        {
-            continue;
-        }
-
-        switch (c)
+        char c;
+        switch (c = *cp)
         {
         case '^':
-            int a = 0;
+            move(bot_r, bot_c, -1, 0, board_rows, board_cols, board);
             break;
 
         case '<':
-
+            move(bot_r, bot_c, 0, -1, board_rows, board_cols, board);
             break;
 
         case '>':
-
+            move(bot_r, bot_c, 0, 1, board_rows, board_cols, board);
             break;
 
         case 'v':
-
+            move(bot_r, bot_c, 1, 0, board_rows, board_cols, board);
             break;
 
         default:
             break;
         }
     }
+}
+
+void print_board(size_t board_rows, size_t board_cols, char board[board_rows][board_cols])
+{
+    for (size_t r = 0; r < board_rows; r++)
+    {
+        for (size_t c = 0; c < board_cols; c++)
+        {
+            printf("%c", board[r][c]);
+        }
+        printf("\n");
+    }
+    printf("\n");
 }
 
 int main()
