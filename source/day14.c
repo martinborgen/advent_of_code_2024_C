@@ -490,8 +490,8 @@ void find_anomaly()
     calculate_bot_pos(botlist, botlist_len, time_min_ent, TILES_WIDTH, TILES_HEIGHT);
     print_bots(botlist, botlist_len);
     printf("Min ent is: %f at time %lu\n", min_ent, time_min_ent);
-    printf("Min ent is: %f at time %lu\n", max_var, time_max_var);
-    printf("Min ent is: %f at time %lu\n", max_adj, time_max_adj);
+    printf("Min ent is: %ld at time %lu\n", max_var, time_max_var);
+    printf("Min ent is: %ld at time %lu\n", max_adj, time_max_adj);
     print_board(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
 
     free(botlist);
