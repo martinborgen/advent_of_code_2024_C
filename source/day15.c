@@ -374,6 +374,22 @@ void print_board(size_t board_rows, size_t board_cols, char board[board_rows][bo
     printf("\n");
 }
 
+int compute_coordinate_sum(size_t board_rows, size_t board_cols, char board[board_rows][board_cols])
+{
+    int sum = 0;
+    for (size_t r = 0; r < board_rows; r++)
+    {
+        for (size_t c = 0; c < board_cols; c++)
+        {
+            if (board[r][c] == 'O')
+            {
+                sum += 100 * r + c;
+            }
+        }
+    }
+    return sum;
+}
+
 int main()
 {
     char *inputs0 = file_reader(INPUTS0_PATH);
@@ -397,6 +413,10 @@ int main()
     process_movements(movement, rows_n, cols_n, board);
 
     print_board(rows_n, cols_n, board);
+
+    int coord_sum = compute_coordinate_sum(rows_n, cols_n, board);
+
+    printf("Coordinate sum: %d\n", coord_sum);
 
     free(movement);
     return 0;
