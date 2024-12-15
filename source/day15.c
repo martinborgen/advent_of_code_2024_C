@@ -326,30 +326,63 @@ once.
 
 void print_board(size_t board_rows, size_t board_cols, char board[board_rows][board_cols]);
 
-// attempts to move a unit on the board. returns true if successful, false otherwise.
-void move(size_t *rp, size_t *cp,
+bool can_move(size_t r, size_t c,
+              int r_dir, int c_dir,
+              size_t board_rows, size_t board_cols, char board[board_rows][board_cols])
+{
+    char ahead = board[r + r_dir][c + c_dir];
+    bool ans = false;
+
+    if (ahead == '.')
+    {
+        ans = true;
+    }
+    else if (ahead == 'O' ||
+             (r_dir == 0 && (ahead == '[' || ahead == ']')))
+    {
+        ans = can_move(r + r_dir, c + c_dir, r_dir, c_dir, board_rows, board_cols, board);
+    }
+    else if (ahead == '[' && r_dir != 0)
+    {
+        bool other = can_move(r + r_dir, c + c_dir + 1, r_dir, c_dir, board_rows, board_cols, board);
+        ans = other && can_move(r + r_dir, c + c_dir, r_dir, c_dir, board_rows, board_cols, board);
+    }
+    else if (ahead == ']' && r_dir != 0)
+    {
+        bool other = can_move(r + r_dir, c + c_dir - 1, r_dir, c_dir, board_rows, board_cols, board);
+        ans = other && can_move(r + r_dir, c + c_dir, r_dir, c_dir, board_rows, board_cols, board);
+    }
+    return ans;
+}
+
+// moves a piece, and those ahead on the board. Does not check if possible. use `can_move()` for that
+void move(size_t r, size_t c,
           int r_dir, int c_dir,
           size_t board_rows, size_t board_cols, char board[board_rows][board_cols])
 {
-    size_t r = *rp;
-    size_t c = *cp;
+
     char ahead = board[r + r_dir][c + c_dir];
-    if (ahead == 'O')
+    if (ahead == 'O' ||
+        (r_dir == 0 && (ahead == '[' || ahead == ']')))
     {
-        size_t rtmp = r + r_dir;
-        size_t ctmp = c + c_dir;
-        move(&rtmp, &ctmp, r_dir, c_dir, board_rows, board_cols, board);
+
+        move(r + r_dir, c + c_dir, r_dir, c_dir, board_rows, board_cols, board);
+    }
+    else if (ahead == '[' && r_dir != 0)
+    {
+
+        move(r + r_dir, c + c_dir, r_dir, c_dir, board_rows, board_cols, board);
+        move(r + r_dir, c + c_dir + 1, r_dir, c_dir, board_rows, board_cols, board);
+    }
+    else if (ahead == ']' && r_dir != 0)
+    {
+
+        move(r + r_dir, c + c_dir, r_dir, c_dir, board_rows, board_cols, board);
+        move(r + r_dir, c + c_dir - 1, r_dir, c_dir, board_rows, board_cols, board);
     }
 
-    ahead = board[r + r_dir][c + c_dir];
-    if (ahead == '.') // not else if because we want stuff ahead to move first if possible
-    {
-        board[r + r_dir][c + c_dir] = board[r][c];
-        board[r][c] = '.';
-        *rp = r + r_dir;
-        *cp = c + c_dir;
-    }
-    // other cases of char is no-op
+    board[r + r_dir][c + c_dir] = board[r][c];
+    board[r][c] = '.';
 }
 
 void process_movements(char *movements, size_t board_rows, size_t board_cols,
@@ -372,23 +405,40 @@ void process_movements(char *movements, size_t board_rows, size_t board_cols,
     // process moves
     for (char *cp = movements; *cp != '\0'; cp++)
     {
+        // print_board(board_rows, board_cols, board);
         char c;
         switch (c = *cp)
         {
         case '^':
-            move(&bot_r, &bot_c, -1, 0, board_rows, board_cols, board);
+            if (can_move(bot_r, bot_c, -1, 0, board_rows, board_cols, board))
+            {
+                move(bot_r, bot_c, -1, 0, board_rows, board_cols, board);
+                bot_r--;
+            }
             break;
 
         case '<':
-            move(&bot_r, &bot_c, 0, -1, board_rows, board_cols, board);
+            if (can_move(bot_r, bot_c, 0, -1, board_rows, board_cols, board))
+            {
+                move(bot_r, bot_c, 0, -1, board_rows, board_cols, board);
+                bot_c--;
+            }
             break;
 
         case '>':
-            move(&bot_r, &bot_c, 0, 1, board_rows, board_cols, board);
+            if (can_move(bot_r, bot_c, 0, 1, board_rows, board_cols, board))
+            {
+                move(bot_r, bot_c, 0, 1, board_rows, board_cols, board);
+                bot_c++;
+            }
             break;
 
         case 'v':
-            move(&bot_r, &bot_c, 1, 0, board_rows, board_cols, board);
+            if (can_move(bot_r, bot_c, 1, 0, board_rows, board_cols, board))
+            {
+                move(bot_r, bot_c, 1, 0, board_rows, board_cols, board);
+                bot_r++;
+            }
             break;
 
         default:
@@ -417,7 +467,7 @@ int compute_coordinate_sum(size_t board_rows, size_t board_cols, char board[boar
     {
         for (size_t c = 0; c < board_cols; c++)
         {
-            if (board[r][c] == 'O')
+            if (board[r][c] == 'O' || board[r][c] == '[')
             {
                 sum += 100 * r + c;
             }
