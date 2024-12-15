@@ -460,21 +460,21 @@ void find_anomaly()
 
         calculate_bot_pos(botlist, botlist_len, t, TILES_WIDTH, TILES_HEIGHT);
 
-        // int e = count_variance(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
-        // if (e > max_variance)
-        // {
-        //     max_variance = e;
-        //     time_for_max_e = t;
-        // }
+        int e = count_variance(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
+        if (e > max_variance)
+        {
+            max_variance = e;
+            time_for_max_e = t;
+        }
 
-        // int a = count_adjecant(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
-        // if (a > max_adj)
-        // {
-        //     max_adj = a;
-        //     time_max_adj = t;
-        // }
+        int a = count_adjecant(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
+        if (a > max_adj)
+        {
+            max_adj = a;
+            time_max_adj = t;
+        }
 
-        float ent = count_entropy(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
+        float ent = count_entropy_pos(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
         if (ent < min_entropy)
         {
             min_entropy = ent;
