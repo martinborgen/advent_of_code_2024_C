@@ -68,16 +68,18 @@ would have to spend to win all possible prizes?
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "file_reader.h"
 #include "my_string.h"
-#include "my_linalg.h"
+// #include "my_linalg.h"
 
-#define INPUTS_PATH "../inputs/day13_sample.txt"
+#define INPUTS_PATH "../inputs/day13.txt"
 
 #define PRICE_A 3
 #define PRICE_B 1
 #define PART2_CORRECTION 10000000000000
+#define EPSILON 0.00000000000001
 
 struct inputs_node
 {
@@ -121,45 +123,35 @@ struct inputs_node *read_inputs(char *inptus_path)
         }
     }
 
+    fclose(f);
     return start;
 }
 
-int find_min_price(struct inputs_node *input)
+uint64_t find_min_price(struct inputs_node *input)
 {
     // conveniton here is aij = elements of matrix A, not buttons
-    quota a11 = {input->ax, 1};
-    quota a12 = {input->bx, 1};
-    quota a21 = {input->ay, 1};
-    quota a22 = {input->by, 1};
+    double a11 = input->ax;
+    double a12 = input->bx;
+    double a21 = input->ay;
+    double a22 = input->by;
 
-    quota x1 = {input->prize_x + PART2_CORRECTION, 1};
-    quota x2 = {input->prize_y + PART2_CORRECTION, 1};
+    double x1 = input->prize_x + PART2_CORRECTION;
+    double x2 = input->prize_y + PART2_CORRECTION;
 
-    // gaussing a 2x2 matrix
-    // normalize first row
-    a12 = quota_div(a12, a11);
-    x1 = quota_div(x1, a11);
-    a11 = (quota){1, 1};
+    double b = (a11 * x2 - a21 * x1) / (a11 * a22 - a12 * a21);
+    double a = (x1 - a12 * b) / a11;
 
-    // subtract a21 * first row from second row.
-    a22 = quota_sub(a22, quota_mult(a21, a12));
-    x2 = quota_sub(x2, quota_mult(a21, x1));
-    a21 = (quota){0, 0};
+    double Ad;
+    double Bd;
+    double a_frac = modf(a, &Ad);
+    double b_frac = modf(b, &Bd);
 
-    // normalize second row
-    x2 = quota_div(x2, a22);
-    a22 = (quota){1, 1};
-
-    // subtract a22 * second row from first row.
-    x1 = quota_sub(x1, quota_mult(a12, x2));
-    a12 = (quota){0, 0};
-
-    int_fast64_t a_presses = quota_icompute(x1);
-    int_fast64_t b_presses = quota_icompute(x2);
-
-    if (quota_is_int(x1) && quota_is_int(x2))
+    if (a_frac < EPSILON && b_frac < EPSILON)
     {
-        return a_presses * PRICE_A + b_presses * PRICE_B;
+        uint64_t A = (uint64_t)(Ad + 0.5);
+        uint64_t B = (uint64_t)(Bd + 0.5);
+        uint64_t price = A * PRICE_A + B * PRICE_B;
+        return price;
     }
     else
     {
@@ -169,19 +161,19 @@ int find_min_price(struct inputs_node *input)
 
 int main()
 {
-    uint32_t tokens = 0;
+    uint64_t tokens = 0;
     struct inputs_node *inputs = read_inputs(INPUTS_PATH);
     for (struct inputs_node *current = inputs; current != NULL; current = current->next)
     {
         printf("Button A: X+%d, Y+%d\nButton B: X+%d, Y+%d\nPrize: X=%d, Y=%d\n\n",
                current->ax, current->ay, current->bx, current->by, current->prize_x, current->prize_y);
 
-        int testres = find_min_price(current);
-        printf("%d\n", testres);
+        uint64_t testres = find_min_price(current);
+        printf("%lu\n", testres);
 
         tokens += testres;
     }
 
-    printf("TOTAL TOKENS: %u\n", tokens);
+    printf("TOTAL TOKENS: %lu\n", tokens);
     return 0;
 }
