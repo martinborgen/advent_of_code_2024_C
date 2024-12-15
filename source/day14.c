@@ -442,11 +442,11 @@ int count_adjecant(bot *botlist, size_t botlist_len, size_t tiles_w, size_t tile
 
 void find_anomaly()
 {
-    uint64_t max_variance = 0;
-    uint64_t time_for_max_e = 0;
-    float min_entropy = __FLT32_MAX__;
-
+    uint64_t max_var = 0;
     uint64_t max_adj = 0;
+    float min_ent = __FLT32_MAX__;
+
+    uint64_t time_max_var = 0;
     uint64_t time_max_adj = 0;
     uint64_t time_min_ent = 0;
 
@@ -461,10 +461,10 @@ void find_anomaly()
         calculate_bot_pos(botlist, botlist_len, t, TILES_WIDTH, TILES_HEIGHT);
 
         int e = count_variance(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
-        if (e > max_variance)
+        if (e > max_var)
         {
-            max_variance = e;
-            time_for_max_e = t;
+            max_var = e;
+            time_max_var = t;
         }
 
         int a = count_adjecant(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
@@ -475,9 +475,9 @@ void find_anomaly()
         }
 
         float ent = count_entropy_pos(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
-        if (ent < min_entropy)
+        if (ent < min_ent)
         {
-            min_entropy = ent;
+            min_ent = ent;
             time_min_ent = t;
         }
 
@@ -489,7 +489,9 @@ void find_anomaly()
 
     calculate_bot_pos(botlist, botlist_len, time_min_ent, TILES_WIDTH, TILES_HEIGHT);
     print_bots(botlist, botlist_len);
-    printf("Min ent is: %f at time %lu\n", min_entropy, time_min_ent);
+    printf("Min ent is: %f at time %lu\n", min_ent, time_min_ent);
+    printf("Min ent is: %f at time %lu\n", max_var, time_max_var);
+    printf("Min ent is: %f at time %lu\n", max_adj, time_max_adj);
     print_board(botlist, botlist_len, TILES_WIDTH, TILES_HEIGHT);
 
     free(botlist);
