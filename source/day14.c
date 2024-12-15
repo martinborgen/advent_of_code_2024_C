@@ -456,7 +456,7 @@ void find_anomaly()
 
     for (int t = 0; t < PART2_MAX_T; t++)
     {
-        memcpy(botlist, botlist_original, botlist_len);
+        memcpy(botlist, botlist_original, sizeof(bot) * botlist_len);
 
         calculate_bot_pos(botlist, botlist_len, t, TILES_WIDTH, TILES_HEIGHT);
 
@@ -485,7 +485,7 @@ void find_anomaly()
         // printf("\n");
     }
 
-    memcpy(botlist, botlist_original, botlist_len);
+    memcpy(botlist, botlist_original, sizeof(bot) * botlist_len);
 
     calculate_bot_pos(botlist, botlist_len, time_min_ent, TILES_WIDTH, TILES_HEIGHT);
     print_bots(botlist, botlist_len);
