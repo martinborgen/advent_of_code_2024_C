@@ -126,9 +126,9 @@ add_executable(
     --config "$<CONFIG>"
     --target vector_test
   )
-  set_tests_properties(vector_test_build PROPERTIES FIXTURES_SETUP    test_fixture)
+  set_tests_properties(vector_test_build PROPERTIES FIXTURES_SETUP    vector_test_fixture)
   add_test(vector_test vector_test)
-  set_tests_properties(vector_test       PROPERTIES FIXTURES_REQUIRED test_fixture)
+  set_tests_properties(vector_test       PROPERTIES FIXTURES_REQUIRED vector_test_fixture)
 
   add_executable(
     hash_table_test 
@@ -140,9 +140,9 @@ add_executable(
     --config "$<CONFIG>"
     --target hash_table_test
   )
-  set_tests_properties(hash_table_test_build PROPERTIES FIXTURES_SETUP    test_fixture)
+  set_tests_properties(hash_table_test_build PROPERTIES FIXTURES_SETUP    hash_test_fixture)
   add_test(hash_table_test hash_table_test)
-  set_tests_properties(hash_table_test       PROPERTIES FIXTURES_REQUIRED test_fixture)
+  set_tests_properties(hash_table_test       PROPERTIES FIXTURES_REQUIRED hash_test_fixture)
 
   add_executable(
     linalg_test 
@@ -154,6 +154,6 @@ add_executable(
     --config "$<CONFIG>"
     --target linalg_test
   )
-  set_tests_properties(linalg_build PROPERTIES FIXTURES_SETUP    test_fixture)
+  set_tests_properties(linalg_build PROPERTIES FIXTURES_SETUP    linalg_test_fixture)
   add_test(linalg_test linalg_test)
-  set_tests_properties(linalg_test       PROPERTIES FIXTURES_REQUIRED test_fixture)
+  set_tests_properties(linalg_test       PROPERTIES FIXTURES_REQUIRED linalg_test_fixture)
