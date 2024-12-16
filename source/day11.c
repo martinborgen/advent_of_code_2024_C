@@ -153,7 +153,7 @@ uint64_t update(uint64_t num,
 
     // hash check. Iterations are stored as the first byte of the u64.
     uint64_t key = (iterations << 56) + num;
-    output = hash_map_get(key, hash_table_rows, hash_table);
+    output = hash_table_get(key, hash_table_rows, hash_table);
     if (output > 0)
     {
         return output;
@@ -182,7 +182,7 @@ uint64_t update(uint64_t num,
     }
 
     key = (iterations << 56) + num;
-    hash_map_insert(key, res, hash_table_rows, hash_table);
+    hash_table_insert(key, res, hash_table_rows, hash_table);
     output += res;
     return output;
 }

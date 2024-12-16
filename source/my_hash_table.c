@@ -12,7 +12,7 @@ typedef struct hash_node
     struct hash_node *next;
 } hash_node;
 
-void hash_map_insert(uint64_t key, uint64_t val, size_t hash_table_rows, hash_node *hash_table[hash_table_rows])
+void hash_table_insert(uint64_t key, uint64_t val, size_t hash_table_rows, hash_node *hash_table[hash_table_rows])
 {
     size_t hash = key % hash_table_rows;
     hash_node *node = hash_table[hash];
@@ -44,7 +44,7 @@ void hash_map_insert(uint64_t key, uint64_t val, size_t hash_table_rows, hash_no
 }
 
 // 0 represents not in table, as values can only be > 0 in this problem
-uint64_t hash_map_get(uint64_t key, size_t hash_table_rows, hash_node *hash_table[hash_table_rows])
+uint64_t hash_table_get(uint64_t key, size_t hash_table_rows, hash_node *hash_table[hash_table_rows])
 {
     size_t hash = key % hash_table_rows;
     hash_node *node = hash_table[hash];
