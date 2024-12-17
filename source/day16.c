@@ -112,7 +112,7 @@ get?
 #include "file_reader.h"
 #include "my_string.h"
 
-#define INPUTS_PATH "../inputs/day16.txt"
+#define INPUTS_PATH "../inputs/day16_sample.txt"
 
 // tuple for positions and directions. Hence the r and c names (for row and column)
 // `tuple = {size_t r, size_t c}`
@@ -140,31 +140,49 @@ tuple tuple_sub(tuple a, tuple b)
     return (tuple){a.r - b.r, a.c - b.c};
 }
 
+tuple tuple_neg(tuple a)
+{
+    return (tuple){-a.r, -a.c};
+}
+
 bool tuple_eq(tuple a, tuple b)
 {
     return (a.r == b.r && a.c == b.c);
 }
 
-void dfs_search(tuple here, tuple prev, uint32_t acc_cost, board_t *board)
+uint32_t dfs_search(tuple here, tuple prev, uint32_t acc_cost, board_t *board, uint32_t *end_cost)
 {
     tuple look_dirs[] = {{-1, 0},
                          {1, 0},
                          {0, -1},
                          {0, 1}};
-
+    uint32_t retval = __UINT32_MAX__;
     tuple moved_dir = tuple_sub(here, prev);
 
-    if (board->cost[here.r * board->rows + here.c] > acc_cost)
+    // If we've found a new cheapest way to get here
+    if (board->cost[here.r * board->rows + here.c] >= acc_cost)
     {
         board->cost[here.r * board->rows + here.c] = acc_cost;
     }
+    else
+    {
+        return retval;
+    }
 
+    // if we're at the end
+    if (tuple_eq(here, board->end))
+    {
+        end_cost[here.r * board->rows + here.c] = acc_cost;
+        return acc_cost;
+    }
+
+    // look up, down, left and right.
     for (size_t i = 0; i < sizeof(look_dirs) / sizeof(tuple); i++)
     {
-        // note: no bounds checking, as the boundary is always a line of '#'
+        // note: no bounds checking, as the boundary is always a line of '#', so we will never look from edges
         tuple look_pos = tuple_add(look_dirs[i], here);
         char look_char = board->maze[look_pos.r * board->rows + look_pos.c];
-        if (look_char == '#')
+        if (look_char == '#' || tuple_eq(look_dirs[i], tuple_neg(moved_dir)))
         {
             continue;
         }
@@ -173,11 +191,22 @@ void dfs_search(tuple here, tuple prev, uint32_t acc_cost, board_t *board)
         uint32_t look_cost = board->cost[look_pos.r * board->rows + look_pos.c];
         uint32_t cost_from_here = acc_cost + 1 + (1000 * is_turn);
 
-        if (cost_from_here < look_cost)
+        if (cost_from_here <= look_cost)
         {
-            dfs_search(look_pos, here, cost_from_here, board);
+            retval = dfs_search(look_pos, here, cost_from_here, board,
+                                end_cost);
+
+            if (retval <= end_cost[here.r * board->rows + here.c])
+            {
+                end_cost[here.r * board->rows + here.c] = retval;
+            }
+            else
+            {
+                retval = end_cost[here.r * board->rows + here.c];
+            }
         }
     }
+    return retval;
 }
 
 void print_board(board_t *board)
@@ -187,6 +216,18 @@ void print_board(board_t *board)
         for (size_t j = 0; j < board->cols; j++)
         {
             printf("%c", board->maze[i * board->rows + j]);
+        }
+        printf("\n");
+    }
+}
+
+void print_arr(size_t rows, size_t cols, uint32_t *arr)
+{
+    for (size_t i = 0; i < rows; i++)
+    {
+        for (size_t j = 0; j < cols; j++)
+        {
+            printf("%u\t", arr[i * rows + j]);
         }
         printf("\n");
     }
@@ -204,6 +245,8 @@ int main()
     tuple start = {0};
     tuple end = {0};
 
+    uint32_t *cost_for_best_path_array = malloc(sizeof(uint32_t) * rows_n * cols_n);
+
     char *line = inputs;
     for (int i = 0; i < rows_n; i++)
     {
@@ -213,6 +256,7 @@ int main()
         for (int j = 0; j < cols_n; j++)
         {
             costs[i * rows_n + j] = __UINT32_MAX__;
+            cost_for_best_path_array[i * rows_n + j] = __UINT32_MAX__;
 
             if (maze[i * rows_n + j] == 'S')
             {
@@ -237,10 +281,30 @@ int main()
 
     print_board(&board);
 
-    dfs_search(start, (tuple){start.r, start.c - 1}, 0, &board);
+    dfs_search(start, (tuple){start.r, start.c - 1}, 0, &board, cost_for_best_path_array);
 
-    uint32_t final_cost = board.cost[end.r * board.rows + end.c];
-    printf("Part 1. Final cost: %u\n", final_cost);
+    uint32_t cheapest_cost = board.cost[end.r * board.rows + end.c];
+    printf("Part 1. Final cost: %u\n", cheapest_cost);
+
+    uint32_t cheapest_path_count = 0;
+
+    for (size_t i = 0; i < board.rows; i++)
+    {
+        for (size_t j = 0; j < board.cols; j++)
+        {
+            if (cost_for_best_path_array[i * board.rows + j] == cheapest_cost)
+            {
+                cheapest_path_count++;
+            }
+            else if (cost_for_best_path_array[i * board.rows + j] > 70000)
+            {
+                cost_for_best_path_array[i * board.rows + j] = 0;
+            }
+        }
+    }
+    print_arr(rows_n, cols_n, cost_for_best_path_array);
+
+    printf("Part 2. Tiles on best path: %u\n", cheapest_path_count);
 
     free(inputs);
     inputs = NULL;
