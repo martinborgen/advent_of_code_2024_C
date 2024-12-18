@@ -121,6 +121,18 @@ typedef struct tuple
     size_t r, c;
 } tuple;
 
+typedef struct edge
+{
+    uint32_t weight;
+    struct maze_node *node;
+} edge;
+
+typedef struct maze_node
+{
+    tuple pos;
+    struct edge up, down, left, right;
+} node;
+
 typedef struct board_struct
 {
     size_t rows, cols;
@@ -145,9 +157,32 @@ tuple tuple_neg(tuple a)
     return (tuple){-a.r, -a.c};
 }
 
+tuple tuple_mult(tuple a, tuple b)
+{
+    return (tuple){a.r * b.r, a.c * b.c};
+}
+
 bool tuple_eq(tuple a, tuple b)
 {
     return (a.r == b.r && a.c == b.c);
+}
+
+node *node_malloc(tuple here)
+{
+    node *new_node = malloc(sizeof(node));
+
+    new_node->pos = here;
+
+    new_node->up.node = NULL;
+    new_node->up.weight = UINT32_MAX;
+    new_node->down.node = NULL;
+    new_node->down.weight = UINT32_MAX;
+    new_node->right.node = NULL;
+    new_node->right.weight = UINT32_MAX;
+    new_node->left.node = NULL;
+    new_node->left.weight = UINT32_MAX;
+
+    return new_node;
 }
 
 uint32_t dfs_search(tuple here, tuple prev, uint32_t acc_cost, board_t *board, bool *visited)
@@ -200,6 +235,126 @@ uint32_t dfs_search(tuple here, tuple prev, uint32_t acc_cost, board_t *board, b
     }
     visited[here.r * board->rows + here.c] = false;
     return min_fork;
+}
+
+bool is_corner(tuple pos, board_t *board)
+{
+    char self = board->maze[pos.r * board->rows + pos.c];
+
+    if (self == '#')
+    {
+        return false;
+    }
+
+    tuple look_dirs[] = {{-1, 0},
+                         {1, 0},
+                         {0, -1},
+                         {0, 1}};
+
+    for (size_t i = 0; i < sizeof(look_dirs) / sizeof(tuple); i++)
+    {
+        tuple look_pos = tuple_add(look_dirs[i], pos);
+        char look_char = board->maze[look_pos.r * board->rows + look_pos.c];
+        if (look_char == '.') // NOTE: Probably not interesting to also add 'S' or 'E' ?
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+uint32_t explore_and_connect_edges(node *this, board_t *board, node **node_arr)
+{
+    tuple look_dirs[] = {{-1, 0},
+                         {1, 0},
+                         {0, -1},
+                         {0, 1}};
+
+    edge *this_edges[] = {&this->up, &this->down, &this->left, &this->right};
+
+    uint32_t edges_count = 0;
+    for (size_t i = 0; i < sizeof(look_dirs) / sizeof(tuple); i++)
+    {
+        tuple look_pos = tuple_add(look_dirs[i], this->pos);
+        char look_char = board->maze[look_pos.r * board->rows + look_pos.c];
+        size_t j = 0;
+        while (look_char != '#')
+        {
+            node *other = node_arr[look_pos.r * board->rows + look_pos.c];
+            edge *other_edges[] = {&this->down, &this->up, &this->right, &this->left};
+            if (other != NULL)
+            {
+                this_edges[i]->node = other;
+                this_edges[i]->weight = j;
+
+                other_edges[i]->node = this;
+                other_edges[i]->weight = j;
+
+                edges_count++;
+            }
+
+            look_pos = tuple_add(tuple_mult(look_dirs[i], (tuple){j, j}), this->pos);
+            look_char = board->maze[look_pos.r * board->rows + look_pos.c];
+            j++;
+        }
+    }
+
+    // IDEA: if only one edge found, this is a dead end. This could be pruned
+    // down. But it ivolves problems how to recursively do it when the full
+    // graph might not have been connected yet.
+    return edges_count;
+}
+
+node *make_graph(board_t *board)
+{
+    node *node_arr[board->rows][board->cols];
+    for (size_t i = 0; i < board->rows; i++)
+    {
+        for (size_t j = 0; j < board->cols; j++)
+        {
+            node_arr[i][j] = NULL;
+        }
+    }
+
+    node_arr[board->start.r][board->start.c] = node_malloc(board->start);
+    node_arr[board->end.r][board->end.c] = node_malloc(board->end);
+
+    // put out nodes
+    uint32_t node_count = 0;
+    for (size_t i = 0; i < board->rows; i++)
+    {
+        for (size_t j = 0; j < board->cols; j++)
+        {
+            tuple ij = {i, j};
+            if (is_corner(ij, board))
+            {
+                node_arr[i][j] = node_malloc(ij);
+            }
+        }
+    }
+
+    // connect nodes
+    for (size_t i = 0; i < board->rows; i++)
+    {
+        for (size_t j = 0; j < board->cols; j++)
+        {
+            if (node_arr[i][j] == NULL)
+            {
+                continue;
+            }
+            node *ij = node_arr[i][j];
+            uint32_t edges = explore_and_connect_edges(ij, board, node_arr);
+            if (edges == 0)
+            {
+                free(ij);
+            }
+        }
+    }
+
+    // put all nodes in a smaller array so we can return it. This is because otherwise isolated nodes would be lost.
+
+    return node_arr[board->start.r][board->start.c];
 }
 
 int main()
