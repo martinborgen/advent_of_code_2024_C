@@ -155,8 +155,6 @@ void print_arr(size_t rows, size_t cols, uint32_t *arr);
 
 uint32_t dfs_search(tuple here, tuple prev, uint32_t acc_cost, board_t *board, bool *visited)
 {
-    uint32_t retval = __UINT32_MAX__; // retval is the cost to get to the end of the dfs
-
     // if we're at the end
     if (tuple_eq(here, board->end))
     {
@@ -173,7 +171,7 @@ uint32_t dfs_search(tuple here, tuple prev, uint32_t acc_cost, board_t *board, b
 
     tuple moved_dir = tuple_sub(here, prev);
     visited[here.r * board->rows + here.c] = true;
-
+    uint32_t min_fork = UINT32_MAX;
     // look up, down, left and right.
     for (size_t i = 0; i < sizeof(look_dirs) / sizeof(tuple); i++)
     {
@@ -195,17 +193,11 @@ uint32_t dfs_search(tuple here, tuple prev, uint32_t acc_cost, board_t *board, b
         print_arr(board->rows, board->cols, board->cost);
         if (cost_from_here <= look_end_cost)
         {
-            retval = dfs_search(look_pos, here, cost_from_here, board, visited);
-            if (retval <= board->cost[here.r * board->rows + here.c])
+            uint32_t fork_depth = dfs_search(look_pos, here, cost_from_here, board, visited);
+            if (fork_depth <= board->cost[here.r * board->rows + here.c])
             {
-                board->cost[here.r * board->rows + here.c] = retval;
+                board->cost[here.r * board->rows + here.c] = fork_depth;
             }
-        }
-        retval = board->cost[here.r * board->rows + here.c]; // to not return UINT32_MAX in case a branch failed
-    }
-    visited[here.r * board->rows + here.c] = false;
-    return retval;
-}
 
 void print_board(board_t *board)
 {
@@ -231,7 +223,7 @@ void print_board_w_visited(board_t *board, bool *visited)
             }
             else
             {
-                printf("%c", board->maze[i * board->rows + j]);
+                min_fork = fork_depth;
             }
         }
         printf("\n");
@@ -248,6 +240,8 @@ void print_arr(size_t rows, size_t cols, uint32_t *arr)
         }
         printf("\n");
     }
+    visited[here.r * board->rows + here.c] = false;
+    return min_fork;
 }
 
 int main()
@@ -273,9 +267,9 @@ int main()
 
         for (int j = 0; j < cols_n; j++)
         {
-            costs[i * rows_n + j] = __UINT32_MAX__;
+            costs[i * rows_n + j] = UINT32_MAX;
             visited[i * rows_n + j] = false;
-            // cost_for_best_path_array[i * rows_n + j] = __UINT32_MAX__;
+            // cost_for_best_path_array[i * rows_n + j] = UINT32_MAX;
 
             if (maze[i * rows_n + j] == 'S')
             {
