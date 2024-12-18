@@ -150,9 +150,6 @@ bool tuple_eq(tuple a, tuple b)
     return (a.r == b.r && a.c == b.c);
 }
 
-void print_board_w_visited(board_t *board, bool *visited);
-void print_arr(size_t rows, size_t cols, uint32_t *arr);
-
 uint32_t dfs_search(tuple here, tuple prev, uint32_t acc_cost, board_t *board, bool *visited)
 {
     // if we're at the end
@@ -161,8 +158,6 @@ uint32_t dfs_search(tuple here, tuple prev, uint32_t acc_cost, board_t *board, b
         board->cost[here.r * board->rows + here.c] = acc_cost;
         return acc_cost;
     }
-
-    printf("%lu, %lu\n", here.r, here.c);
 
     tuple look_dirs[] = {{-1, 0},
                          {1, 0},
@@ -189,8 +184,6 @@ uint32_t dfs_search(tuple here, tuple prev, uint32_t acc_cost, board_t *board, b
 
         uint32_t look_end_cost = board->cost[look_pos.r * board->rows + look_pos.c];
         uint32_t cost_from_here = acc_cost + 1 + (1000 * is_turn);
-        print_board_w_visited(board, visited);
-        print_arr(board->rows, board->cols, board->cost);
         if (cost_from_here <= look_end_cost)
         {
             uint32_t fork_depth = dfs_search(look_pos, here, cost_from_here, board, visited);
@@ -199,46 +192,11 @@ uint32_t dfs_search(tuple here, tuple prev, uint32_t acc_cost, board_t *board, b
                 board->cost[here.r * board->rows + here.c] = fork_depth;
             }
 
-void print_board(board_t *board)
-{
-    for (size_t i = 0; i < board->rows; i++)
-    {
-        for (size_t j = 0; j < board->cols; j++)
-        {
-            printf("%c", board->maze[i * board->rows + j]);
-        }
-        printf("\n");
-    }
-}
-
-void print_board_w_visited(board_t *board, bool *visited)
-{
-    for (size_t i = 0; i < board->rows; i++)
-    {
-        for (size_t j = 0; j < board->cols; j++)
-        {
-            if (visited[i * board->rows + j])
-            {
-                printf("%c", 'O');
-            }
-            else
+            if (fork_depth <= min_fork)
             {
                 min_fork = fork_depth;
             }
         }
-        printf("\n");
-    }
-}
-
-void print_arr(size_t rows, size_t cols, uint32_t *arr)
-{
-    for (size_t i = 0; i < rows; i++)
-    {
-        for (size_t j = 0; j < cols; j++)
-        {
-            printf("%u\t", arr[i * rows + j]);
-        }
-        printf("\n");
     }
     visited[here.r * board->rows + here.c] = false;
     return min_fork;
@@ -294,8 +252,6 @@ int main()
 
     visited[start.r * board.rows + start.c] = true;
 
-    print_board(&board);
-
     dfs_search(start, (tuple){start.r, start.c - 1}, 0, &board, visited);
 
     uint32_t cheapest_cost = board.cost[end.r * board.rows + end.c];
@@ -311,13 +267,8 @@ int main()
             {
                 cheapest_path_count++;
             }
-            else if (board.cost[i * board.rows + j] > 70000)
-            {
-                board.cost[i * board.rows + j] = 0;
-            }
         }
     }
-    print_arr(rows_n, cols_n, board.cost);
 
     printf("Part 2. Tiles on best path: %u\n", cheapest_path_count);
 
