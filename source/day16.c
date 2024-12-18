@@ -251,11 +251,13 @@ bool is_corner(tuple pos, board_t *board)
                          {0, -1},
                          {0, 1}};
 
-    for (size_t i = 0; i < sizeof(look_dirs) / sizeof(tuple); i++)
+    for (size_t i = 0; i < 4; i++)
     {
-        tuple look_pos = tuple_add(look_dirs[i], pos);
-        char look_char = board->maze[look_pos.r * board->rows + look_pos.c];
-        if (look_char == '.') // NOTE: Probably not interesting to also add 'S' or 'E' ?
+        tuple look_pos0 = tuple_add(look_dirs[i], pos);
+        tuple look_pos1 = tuple_add(look_dirs[(i + 2) % 4], pos);
+        char look_char0 = board->maze[look_pos0.r * board->rows + look_pos0.c];
+        char look_char1 = board->maze[look_pos1.r * board->rows + look_pos1.c];
+        if (look_char0 == '.' && look_char1 == '.') // NOTE: Probably not interesting to also add 'S' or 'E' ?
         {
             return true;
         }
@@ -278,11 +280,11 @@ uint32_t explore_and_connect_edges(node *this, board_t *board, node **node_arr)
     {
         tuple look_pos = tuple_add(look_dirs[i], this->pos);
         char look_char = board->maze[look_pos.r * board->rows + look_pos.c];
-        size_t j = 0;
+        size_t j = 1;
         while (look_char != '#')
         {
             node *other = node_arr[look_pos.r * board->rows + look_pos.c];
-            edge *other_edges[] = {&this->down, &this->up, &this->right, &this->left};
+            edge *other_edges[] = {&other->down, &other->up, &other->right, &other->left};
             if (other != NULL)
             {
                 this_edges[i]->node = other;
@@ -292,11 +294,12 @@ uint32_t explore_and_connect_edges(node *this, board_t *board, node **node_arr)
                 other_edges[i]->weight = j;
 
                 edges_count++;
+                break;
             }
 
+            j++;
             look_pos = tuple_add(tuple_mult(look_dirs[i], (tuple){j, j}), this->pos);
             look_char = board->maze[look_pos.r * board->rows + look_pos.c];
-            j++;
         }
     }
 
@@ -306,19 +309,19 @@ uint32_t explore_and_connect_edges(node *this, board_t *board, node **node_arr)
     return edges_count;
 }
 
-node *make_graph(board_t *board)
+node **make_graph(board_t *board, size_t *ret_size)
 {
-    node *node_arr[board->rows][board->cols];
+    node **node_arr = malloc(sizeof(node *) * board->rows * board->cols);
     for (size_t i = 0; i < board->rows; i++)
     {
         for (size_t j = 0; j < board->cols; j++)
         {
-            node_arr[i][j] = NULL;
+            node_arr[i * board->rows + j] = NULL;
         }
     }
 
-    node_arr[board->start.r][board->start.c] = node_malloc(board->start);
-    node_arr[board->end.r][board->end.c] = node_malloc(board->end);
+    node_arr[board->start.r * board->rows + board->start.c] = node_malloc(board->start);
+    node_arr[board->end.r * board->rows + board->end.c] = node_malloc(board->end);
 
     // put out nodes
     uint32_t node_count = 0;
@@ -329,7 +332,7 @@ node *make_graph(board_t *board)
             tuple ij = {i, j};
             if (is_corner(ij, board))
             {
-                node_arr[i][j] = node_malloc(ij);
+                node_arr[i * board->rows + j] = node_malloc(ij);
             }
         }
     }
@@ -339,11 +342,11 @@ node *make_graph(board_t *board)
     {
         for (size_t j = 0; j < board->cols; j++)
         {
-            if (node_arr[i][j] == NULL)
+            if (node_arr[i * board->rows + j] == NULL)
             {
                 continue;
             }
-            node *ij = node_arr[i][j];
+            node *ij = node_arr[i * board->rows + j];
             uint32_t edges = explore_and_connect_edges(ij, board, node_arr);
             if (edges == 0)
             {
@@ -353,8 +356,21 @@ node *make_graph(board_t *board)
     }
 
     // put all nodes in a smaller array so we can return it. This is because otherwise isolated nodes would be lost.
+    node **ret_arr = malloc(sizeof(node *) * node_count);
+    size_t added = 0;
+    for (size_t i = 0; i < board->rows; i++)
+    {
+        for (size_t j = 0; j < board->cols; j++)
+        {
+            if (node_arr[i * board->rows + j])
+            {
+                ret_arr[added] = node_arr[i * board->rows + j];
+                added++;
+            }
+        }
+    }
 
-    return node_arr[board->start.r][board->start.c];
+    return ret_arr;
 }
 
 int main()
@@ -408,6 +424,9 @@ int main()
     visited[start.r * board.rows + start.c] = true;
 
     dfs_search(start, (tuple){start.r, start.c - 1}, 0, &board, visited);
+
+    size_t graph_node_count = 0;
+    node **graph = make_graph(&board, &graph_node_count);
 
     uint32_t cheapest_cost = board.cost[end.r * board.rows + end.c];
     printf("Part 1. Final cost: %u\n", cheapest_cost);
