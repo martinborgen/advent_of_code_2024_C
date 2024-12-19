@@ -118,7 +118,7 @@ get?
 // `tuple = {size_t r, size_t c}`
 typedef struct tuple
 {
-    size_t r, c;
+    int64_t r, c;
 } tuple;
 
 typedef struct edge
@@ -157,9 +157,14 @@ tuple tuple_neg(tuple a)
     return (tuple){-a.r, -a.c};
 }
 
-tuple tuple_mult(tuple a, tuple b)
+tuple tuple_scalar_mult(tuple a, int b)
 {
-    return (tuple){a.r * b.r, a.c * b.c};
+    return (tuple){a.r * b, a.c * b};
+}
+
+int tuple_dot_prod(tuple a, tuple b)
+{
+    return a.r * b.r + a.c * b.c;
 }
 
 bool tuple_eq(tuple a, tuple b)
@@ -185,46 +190,52 @@ node *node_malloc(tuple here)
     return new_node;
 }
 
-uint32_t dfs_search(tuple here, tuple prev, uint32_t acc_cost, board_t *board, bool *visited)
+uint32_t dfs_search(node *here, tuple prev_pos, uint32_t acc_cost, board_t *board, bool *visited)
 {
     // if we're at the end
-    if (tuple_eq(here, board->end))
+    if (tuple_eq(here->pos, board->end))
     {
-        board->cost[here.r * board->rows + here.c] = acc_cost;
+        board->cost[here->pos.r * board->rows + here->pos.c] = acc_cost;
         return acc_cost;
     }
 
-    tuple look_dirs[] = {{-1, 0},
-                         {1, 0},
-                         {0, -1},
-                         {0, 1}};
+    edge *look_edges[] = {&here->up, &here->down, &here->left, &here->right};
 
-    tuple moved_dir = tuple_sub(here, prev);
-    visited[here.r * board->rows + here.c] = true;
+    tuple moved_dir = tuple_sub(here->pos, prev_pos);
+
+    visited[here->pos.r * board->rows + here->pos.c] = true;
+
     uint32_t min_fork = UINT32_MAX;
+
     // look up, down, left and right.
-    for (size_t i = 0; i < sizeof(look_dirs) / sizeof(tuple); i++)
+    for (size_t i = 0; i < sizeof(look_edges) / sizeof(edge *); i++)
     {
         // note: no bounds checking, as the boundary is always a line of '#', so we will never look from edges
-        tuple look_pos = tuple_add(look_dirs[i], here);
-        char look_char = board->maze[look_pos.r * board->rows + look_pos.c];
-        bool is_turn = !tuple_eq(look_dirs[i], moved_dir);
-        bool is_reverse = tuple_eq(look_dirs[i], tuple_neg(moved_dir));
-        bool look_visited = visited[look_pos.r * board->rows + look_pos.c];
-
-        if (look_char == '#' || is_reverse || look_visited)
+        node *look_node = look_edges[i]->node;
+        if (look_node == NULL)
         {
             continue;
         }
 
-        uint32_t look_end_cost = board->cost[look_pos.r * board->rows + look_pos.c];
-        uint32_t cost_from_here = acc_cost + 1 + (1000 * is_turn);
+        tuple look_dir = tuple_sub(look_node->pos, here->pos);
+        int32_t dir_dot_prod = tuple_dot_prod(moved_dir, look_dir);
+        bool is_turn = dir_dot_prod == 0;
+        bool is_reverse = dir_dot_prod < 0;
+        bool look_visited = visited[look_node->pos.r * board->rows + look_node->pos.c];
+
+        if (is_reverse || look_visited)
+        {
+            continue;
+        }
+
+        uint32_t look_end_cost = board->cost[look_node->pos.r * board->rows + look_node->pos.c];
+        uint32_t cost_from_here = acc_cost + look_edges[i]->weight + (1000 * is_turn);
         if (cost_from_here <= look_end_cost)
         {
-            uint32_t fork_depth = dfs_search(look_pos, here, cost_from_here, board, visited);
-            if (fork_depth <= board->cost[here.r * board->rows + here.c])
+            uint32_t fork_depth = dfs_search(look_node, here->pos, cost_from_here, board, visited);
+            if (fork_depth <= board->cost[here->pos.r * board->rows + here->pos.c])
             {
-                board->cost[here.r * board->rows + here.c] = fork_depth;
+                board->cost[here->pos.r * board->rows + here->pos.c] = fork_depth;
             }
 
             if (fork_depth <= min_fork)
@@ -233,7 +244,7 @@ uint32_t dfs_search(tuple here, tuple prev, uint32_t acc_cost, board_t *board, b
             }
         }
     }
-    visited[here.r * board->rows + here.c] = false;
+    visited[here->pos.r * board->rows + here->pos.c] = false;
     return min_fork;
 }
 
@@ -247,17 +258,17 @@ bool is_corner(tuple pos, board_t *board)
     }
 
     tuple look_dirs[] = {{-1, 0},
-                         {1, 0},
-                         {0, -1},
-                         {0, 1}};
+                         {1, 0}};
 
-    for (size_t i = 0; i < 4; i++)
+    for (size_t i = 0; i < sizeof(look_dirs) / sizeof(tuple); i++)
     {
-        tuple look_pos0 = tuple_add(look_dirs[i], pos);
-        tuple look_pos1 = tuple_add(look_dirs[(i + 2) % 4], pos);
-        char look_char0 = board->maze[look_pos0.r * board->rows + look_pos0.c];
-        char look_char1 = board->maze[look_pos1.r * board->rows + look_pos1.c];
-        if (look_char0 == '.' && look_char1 == '.') // NOTE: Probably not interesting to also add 'S' or 'E' ?
+        tuple look_left = tuple_add((tuple){0, -1}, pos);
+        tuple look_right = tuple_add((tuple){0, 1}, pos);
+        tuple look_i = tuple_add(look_dirs[i], pos);
+        char look_char_i = board->maze[look_i.r * board->rows + look_i.c];
+        char look_char_left = board->maze[look_left.r * board->rows + look_left.c];
+        char look_char_right = board->maze[look_right.r * board->rows + look_right.c];
+        if (look_char_i == '.' && (look_char_left == '.' || look_char_right == '.')) // NOTE: Probably not interesting to also add 'S' or 'E' ?
         {
             return true;
         }
@@ -298,7 +309,7 @@ uint32_t explore_and_connect_edges(node *this, board_t *board, node **node_arr)
             }
 
             j++;
-            look_pos = tuple_add(tuple_mult(look_dirs[i], (tuple){j, j}), this->pos);
+            look_pos = tuple_add(tuple_scalar_mult(look_dirs[i], j), this->pos);
             look_char = board->maze[look_pos.r * board->rows + look_pos.c];
         }
     }
@@ -333,6 +344,7 @@ node **make_graph(board_t *board, size_t *ret_size)
             if (is_corner(ij, board))
             {
                 node_arr[i * board->rows + j] = node_malloc(ij);
+                node_count++;
             }
         }
     }
@@ -351,26 +363,12 @@ node **make_graph(board_t *board, size_t *ret_size)
             if (edges == 0)
             {
                 free(ij);
+                node_arr[i * board->rows + j] = NULL;
             }
         }
     }
 
-    // put all nodes in a smaller array so we can return it. This is because otherwise isolated nodes would be lost.
-    node **ret_arr = malloc(sizeof(node *) * node_count);
-    size_t added = 0;
-    for (size_t i = 0; i < board->rows; i++)
-    {
-        for (size_t j = 0; j < board->cols; j++)
-        {
-            if (node_arr[i * board->rows + j])
-            {
-                ret_arr[added] = node_arr[i * board->rows + j];
-                added++;
-            }
-        }
-    }
-
-    return ret_arr;
+    return node_arr;
 }
 
 int main()
@@ -385,8 +383,6 @@ int main()
     bool *visited = malloc(sizeof(bool) * rows_n * cols_n);
     tuple start = {0};
     tuple end = {0};
-
-    // uint32_t *cost_for_best_path_array = malloc(sizeof(uint32_t) * rows_n * cols_n);
 
     char *line = inputs;
     for (int i = 0; i < rows_n; i++)
@@ -423,10 +419,10 @@ int main()
 
     visited[start.r * board.rows + start.c] = true;
 
-    dfs_search(start, (tuple){start.r, start.c - 1}, 0, &board, visited);
-
     size_t graph_node_count = 0;
-    node **graph = make_graph(&board, &graph_node_count);
+    node **node_arr = make_graph(&board, &graph_node_count);
+
+    dfs_search(node_arr[start.r * board.rows + start.c], (tuple){start.r, start.c - 1}, 0, &board, visited);
 
     uint32_t cheapest_cost = board.cost[end.r * board.rows + end.c];
     printf("Part 1. Final cost: %u\n", cheapest_cost);
