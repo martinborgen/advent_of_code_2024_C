@@ -133,6 +133,12 @@ typedef struct maze_node
     struct edge up, down, left, right;
 } node;
 
+typedef struct q_node
+{
+    node *n;
+    struct q_node *next;
+} q_node;
+
 typedef struct board_struct
 {
     size_t rows, cols;
@@ -190,7 +196,11 @@ node *node_malloc(tuple here)
     return new_node;
 }
 
-uint32_t dfs_search(node *here, tuple prev_pos, uint32_t acc_cost, board_t *board, bool *visited)
+void insert_w_prio(q_node *queue, int32_t prio)
+{
+}
+
+uint32_t dfs_search(node *here, tuple prev_pos, uint32_t acc_cost, board_t *board, uint32_t *visited)
 {
     // if we're at the end
     if (tuple_eq(here->pos, board->end))
