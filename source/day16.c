@@ -200,7 +200,7 @@ void insert_w_prio(q_node *queue, int32_t prio)
 {
 }
 
-uint32_t dfs_search(node *here, tuple prev_pos, uint32_t acc_cost, board_t *board, uint32_t *visited)
+uint32_t dfs_search(node *here, tuple prev_pos, uint32_t acc_cost, board_t *board, bool *visited)
 {
     // if we're at the end
     if (tuple_eq(here->pos, board->end))
