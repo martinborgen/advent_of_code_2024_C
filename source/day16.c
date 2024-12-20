@@ -208,7 +208,7 @@ uint32_t dfs_search(node *here, tuple prev_pos, uint32_t acc_cost, board_t *boar
         board->cost[here->pos.r * board->rows + here->pos.c] = acc_cost;
         return acc_cost;
     }
-
+    printf("at: %lu,%lu\n", here->pos.r, here->pos.c);
     edge *look_edges[] = {&here->up, &here->down, &here->left, &here->right};
 
     tuple moved_dir = tuple_sub(here->pos, prev_pos);
