@@ -206,7 +206,7 @@ uint32_t dfs_search(node *here, tuple prev_pos, uint32_t acc_cost, board_t *boar
     visited[here->pos.r * board->rows + here->pos.c] = true;
 
     uint32_t min_fork = UINT32_MAX;
-
+    uint32_t deadends = 0;
     // look up, down, left and right.
     for (size_t i = 0; i < sizeof(look_edges) / sizeof(edge *); i++)
     {
@@ -214,6 +214,7 @@ uint32_t dfs_search(node *here, tuple prev_pos, uint32_t acc_cost, board_t *boar
         node *look_node = look_edges[i]->node;
         if (look_node == NULL)
         {
+            deadends++;
             continue;
         }
 
@@ -244,6 +245,32 @@ uint32_t dfs_search(node *here, tuple prev_pos, uint32_t acc_cost, board_t *boar
             }
         }
     }
+
+    // do some cleaning up on the way back from the recursion
+    if (deadends == 3)
+    {
+        if (here->up.node)
+        {
+            printf("removed node %lu,%lu from %lu,%lu\n", here->pos.r, here->pos.c, here->up.node->pos.r, here->up.node->pos.c);
+            here->up.node->down.node = NULL;
+        }
+        else if (here->down.node)
+        {
+            printf("removed node %lu,%lu from %lu,%lu\n", here->pos.r, here->pos.c, here->down.node->pos.r, here->down.node->pos.c);
+            here->down.node->up.node = NULL;
+        }
+        else if (here->left.node)
+        {
+            printf("removed node %lu,%lu from %lu,%lu\n", here->pos.r, here->pos.c, here->left.node->pos.r, here->left.node->pos.c);
+            here->left.node->right.node = NULL;
+        }
+        else if (here->right.node)
+        {
+            printf("removed node %lu,%lu from %lu,%lu\n", here->pos.r, here->pos.c, here->right.node->pos.r, here->right.node->pos.c);
+            here->right.node->left.node = NULL;
+        }
+    }
+
     visited[here->pos.r * board->rows + here->pos.c] = false;
     return min_fork;
 }
