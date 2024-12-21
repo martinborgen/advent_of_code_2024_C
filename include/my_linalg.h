@@ -8,6 +8,11 @@ typedef struct quota
     int_fast64_t numerator, denominator;
 } quota;
 
+typedef struct tuple
+{
+    int64_t x, y;
+} tuple;
+
 quota quota_mult(quota a, quota b);
 
 quota quota_div(quota a, quota b);

@@ -62,3 +62,33 @@ bool quota_is_int(quota q)
 {
     return q.numerator % q.denominator == 0;
 }
+
+tuple tuple_add(tuple a, tuple b)
+{
+    return (tuple){a.x + b.x, a.y + b.y};
+}
+
+tuple tuple_sub(tuple a, tuple b)
+{
+    return (tuple){a.x - b.x, a.y - b.y};
+}
+
+tuple tuple_neg(tuple a)
+{
+    return (tuple){-a.x, -a.y};
+}
+
+tuple tuple_scalar_mult(tuple a, int b)
+{
+    return (tuple){a.x * b, a.y * b};
+}
+
+int tuple_dot_prod(tuple a, tuple b)
+{
+    return a.x * b.x + a.y * b.y;
+}
+
+bool tuple_eq(tuple a, tuple b)
+{
+    return (a.x == b.x && a.y == b.y);
+}
