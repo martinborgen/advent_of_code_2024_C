@@ -101,6 +101,18 @@ move, rotating the Reindeer from facing East to facing North.
 
 Analyze your map carefully. What is the lowest score a Reindeer could possibly
 get?
+
+
+PART 2: Count all tiles that are on at least one of the best paths.
+
+Comment: This turned out a bit miessier than I'd have liked. I tried a more neat
+way to handle the directions and such with the tuple struct, but in the end,
+several parts of my code turned out to be four almost identical if-statements
+for each direction.
+
+Also lots of logic could be simplified, like not having three arrays that track
+what score it ended having, whats been visited, and what is the best path to a
+node so far -- the last two should be possible to combine, for instance.
  */
 
 #include <stdbool.h>
@@ -132,12 +144,6 @@ typedef struct maze_node
     tuple pos;
     struct edge up, down, left, right;
 } node;
-
-typedef struct q_node
-{
-    node *n;
-    struct q_node *next;
-} q_node;
 
 typedef struct board_struct
 {
@@ -196,10 +202,6 @@ node *node_malloc(tuple here)
     new_node->left.weight = UINT32_MAX;
 
     return new_node;
-}
-
-void insert_w_prio(q_node *queue, int32_t prio)
-{
 }
 
 uint32_t dfs_search(node *here, tuple prev_pos, uint32_t acc_cost, board_t *board, bool *visited)
@@ -482,7 +484,6 @@ int main()
             costs[i * rows_n + j] = UINT32_MAX - 1001;
             end_costs[i * rows_n + j] = UINT32_MAX;
             visited[i * rows_n + j] = false;
-            // cost_for_best_path_array[i * rows_n + j] = UINT32_MAX;
 
             if (maze[i * rows_n + j] == 'S')
             {
