@@ -83,7 +83,7 @@ tuple tuple_scalar_mult(tuple a, int b)
     return (tuple){a.x * b, a.y * b};
 }
 
-int tuple_dot_prod(tuple a, tuple b)
+int64_t tuple_dot_prod(tuple a, tuple b)
 {
     return a.x * b.x + a.y * b.y;
 }
