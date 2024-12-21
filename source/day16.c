@@ -252,7 +252,7 @@ uint32_t dfs_search(node *here, tuple prev_pos, uint32_t acc_cost, board_t *boar
         uint32_t cost_from_here = acc_cost + look_edges[i]->weight + (1000 * is_turn);
 
         if (cost_from_here <= look_end_cost &&
-            cost_from_here <= look_cost &&
+            cost_from_here <= look_cost + 1000 &&
             cost_from_here <= board->best_path_cost)
         {
             uint32_t fork_depth = dfs_search(look_node, here->pos, cost_from_here, board, visited);
@@ -447,7 +447,7 @@ int main()
 
         for (int j = 0; j < cols_n; j++)
         {
-            costs[i * rows_n + j] = UINT32_MAX;
+            costs[i * rows_n + j] = UINT32_MAX - 1001;
             end_costs[i * rows_n + j] = UINT32_MAX;
             visited[i * rows_n + j] = false;
             // cost_for_best_path_array[i * rows_n + j] = UINT32_MAX;
