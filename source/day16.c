@@ -425,6 +425,38 @@ node **make_graph(board_t *board, size_t *ret_size)
     return node_arr;
 }
 
+// get the tiles between this node and all its neighbours that share that same end_cost
+uint32_t get_tiles_on_path(node *here, board_t *board)
+{
+    uint32_t sum = 0;
+    uint32_t end_cost = board->end_cost[here->pos.r * board->rows + here->pos.c];
+    if (here->up.node != NULL &&
+        board->end_cost[here->up.node->pos.r * board->rows + here->up.node->pos.c] == end_cost)
+    {
+        sum += here->up.weight - 1;
+    }
+
+    if (here->down.node != NULL &&
+        board->end_cost[here->down.node->pos.r * board->rows + here->down.node->pos.c] == end_cost)
+    {
+        sum += here->down.weight - 1;
+    }
+
+    if (here->left.node != NULL &&
+        board->end_cost[here->left.node->pos.r * board->rows + here->left.node->pos.c] == end_cost)
+    {
+        sum += here->left.weight - 1;
+    }
+
+    if (here->right.node != NULL &&
+        board->end_cost[here->right.node->pos.r * board->rows + here->right.node->pos.c] == end_cost)
+    {
+        sum += here->right.weight - 1;
+    }
+
+    return sum;
+}
+
 int main()
 {
     char *inputs = file_reader(INPUTS_PATH);
@@ -486,17 +518,19 @@ int main()
     printf("Part 1. Final cost: %u\n", cheapest_cost);
 
     uint32_t cheapest_path_count = 0;
-
+    uint32_t node_count = 0;
     for (size_t i = 0; i < board.rows; i++)
     {
         for (size_t j = 0; j < board.cols; j++)
         {
             if (board.end_cost[i * board.rows + j] == cheapest_cost)
             {
-                cheapest_path_count++;
+                cheapest_path_count += get_tiles_on_path(node_arr[i * board.rows + j], &board);
+                node_count++;
             }
         }
     }
+    cheapest_path_count = cheapest_path_count / 2 + node_count; // because we add each path between nodes twice
 
     printf("Part 2. Tiles on best path: %u\n", cheapest_path_count);
 
