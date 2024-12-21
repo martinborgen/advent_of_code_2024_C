@@ -143,6 +143,7 @@ typedef struct board_struct
 {
     size_t rows, cols;
     char *maze;
+    uint32_t *end_cost;
     uint32_t *cost;
     tuple start;
     tuple end;
@@ -205,10 +206,16 @@ uint32_t dfs_search(node *here, tuple prev_pos, uint32_t acc_cost, board_t *boar
     // if we're at the end
     if (tuple_eq(here->pos, board->end))
     {
-        board->cost[here->pos.r * board->rows + here->pos.c] = acc_cost;
+        board->end_cost[here->pos.r * board->rows + here->pos.c] = acc_cost;
         return acc_cost;
     }
     printf("at: %lu,%lu\n", here->pos.r, here->pos.c);
+
+    if (acc_cost < board->cost[here->pos.r * board->rows + here->pos.c])
+    {
+        board->cost[here->pos.r * board->rows + here->pos.c] = acc_cost;
+    }
+
     edge *look_edges[] = {&here->up, &here->down, &here->left, &here->right};
 
     tuple moved_dir = tuple_sub(here->pos, prev_pos);
@@ -239,14 +246,15 @@ uint32_t dfs_search(node *here, tuple prev_pos, uint32_t acc_cost, board_t *boar
             continue;
         }
 
-        uint32_t look_end_cost = board->cost[look_node->pos.r * board->rows + look_node->pos.c];
+        uint32_t look_end_cost = board->end_cost[look_node->pos.r * board->rows + look_node->pos.c];
+        uint32_t look_cost = board->cost[look_node->pos.r * board->rows + look_node->pos.c];
         uint32_t cost_from_here = acc_cost + look_edges[i]->weight + (1000 * is_turn);
-        if (cost_from_here <= look_end_cost)
+        if (cost_from_here <= look_end_cost && cost_from_here <= look_cost)
         {
             uint32_t fork_depth = dfs_search(look_node, here->pos, cost_from_here, board, visited);
-            if (fork_depth <= board->cost[here->pos.r * board->rows + here->pos.c])
+            if (fork_depth <= board->end_cost[here->pos.r * board->rows + here->pos.c])
             {
-                board->cost[here->pos.r * board->rows + here->pos.c] = fork_depth;
+                board->end_cost[here->pos.r * board->rows + here->pos.c] = fork_depth;
             }
 
             if (fork_depth <= min_fork)
@@ -416,7 +424,8 @@ int main()
     size_t cols_n = strstr(inputs, "\n") - inputs;
 
     char *maze = malloc(sizeof(char) * rows_n * cols_n);
-    uint32_t *costs = malloc(sizeof(uint32_t) * rows_n * cols_n); // the number is the cost to get there
+    uint32_t *costs = malloc(sizeof(uint32_t) * rows_n * cols_n);     // the number is the cost to get there
+    uint32_t *end_costs = malloc(sizeof(uint32_t) * rows_n * cols_n); // the best "end cost" found to get there
     bool *visited = malloc(sizeof(bool) * rows_n * cols_n);
     tuple start = {0};
     tuple end = {0};
@@ -430,6 +439,7 @@ int main()
         for (int j = 0; j < cols_n; j++)
         {
             costs[i * rows_n + j] = UINT32_MAX;
+            end_costs[i * rows_n + j] = UINT32_MAX;
             visited[i * rows_n + j] = false;
             // cost_for_best_path_array[i * rows_n + j] = UINT32_MAX;
 
@@ -450,6 +460,7 @@ int main()
     board.rows = rows_n;
     board.cols = cols_n;
     board.cost = costs;
+    board.end_cost = end_costs;
     board.start = start;
     board.end = end;
     board.maze = maze;
@@ -461,7 +472,7 @@ int main()
 
     dfs_search(node_arr[start.r * board.rows + start.c], (tuple){start.r, start.c - 1}, 0, &board, visited);
 
-    uint32_t cheapest_cost = board.cost[end.r * board.rows + end.c];
+    uint32_t cheapest_cost = board.end_cost[end.r * board.rows + end.c];
     printf("Part 1. Final cost: %u\n", cheapest_cost);
 
     uint32_t cheapest_path_count = 0;
@@ -470,7 +481,7 @@ int main()
     {
         for (size_t j = 0; j < board.cols; j++)
         {
-            if (board.cost[i * board.rows + j] == cheapest_cost)
+            if (board.end_cost[i * board.rows + j] == cheapest_cost)
             {
                 cheapest_path_count++;
             }
