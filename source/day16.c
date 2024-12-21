@@ -112,7 +112,7 @@ get?
 #include "file_reader.h"
 #include "my_string.h"
 
-#define INPUTS_PATH "../inputs/day16_sample.txt"
+#define INPUTS_PATH "../inputs/day16.txt"
 
 // tuple for positions and directions. Hence the r and c names (for row and column)
 // `tuple = {size_t r, size_t c}`
@@ -147,6 +147,7 @@ typedef struct board_struct
     uint32_t *cost;
     tuple start;
     tuple end;
+    uint32_t best_path_cost;
 } board_t;
 
 tuple tuple_add(tuple a, tuple b)
@@ -249,7 +250,10 @@ uint32_t dfs_search(node *here, tuple prev_pos, uint32_t acc_cost, board_t *boar
         uint32_t look_end_cost = board->end_cost[look_node->pos.r * board->rows + look_node->pos.c];
         uint32_t look_cost = board->cost[look_node->pos.r * board->rows + look_node->pos.c];
         uint32_t cost_from_here = acc_cost + look_edges[i]->weight + (1000 * is_turn);
-        if (cost_from_here <= look_end_cost && cost_from_here <= look_cost)
+
+        if (cost_from_here <= look_end_cost &&
+            cost_from_here <= look_cost &&
+            cost_from_here <= board->best_path_cost)
         {
             uint32_t fork_depth = dfs_search(look_node, here->pos, cost_from_here, board, visited);
             if (fork_depth <= board->end_cost[here->pos.r * board->rows + here->pos.c])
@@ -260,6 +264,11 @@ uint32_t dfs_search(node *here, tuple prev_pos, uint32_t acc_cost, board_t *boar
             if (fork_depth <= min_fork)
             {
                 min_fork = fork_depth;
+            }
+
+            if (fork_depth < board->best_path_cost)
+            {
+                board->best_path_cost = fork_depth;
             }
         }
     }
@@ -464,6 +473,7 @@ int main()
     board.start = start;
     board.end = end;
     board.maze = maze;
+    board.best_path_cost = UINT32_MAX;
 
     visited[start.r * board.rows + start.c] = true;
 
