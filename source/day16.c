@@ -274,7 +274,7 @@ uint32_t dfs_search(node *here, tuple prev_pos, uint32_t acc_cost, board_t *boar
     }
 
     // do some cleaning up on the way back from the recursion
-    if (deadends == 3)
+    if (deadends == 3 && !tuple_eq(here->pos, board->start) && !tuple_eq(here->pos, board->end))
     {
         if (here->up.node)
         {
