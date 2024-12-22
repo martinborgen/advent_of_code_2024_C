@@ -21,7 +21,7 @@ part 2: find a value of register A such that the computer outputs a compy of the
 #include "my_string.h"
 #include "vector.h"
 
-#define INPUTS_PATH "../inputs/day17_sample2.txt"
+#define INPUTS_PATH "../inputs/day17.txt"
 
 struct computer
 {
@@ -194,7 +194,8 @@ int main()
         token = strtok(NULL, ",");
     }
 
-    for (int i = 0; i < INT_MAX; i++)
+    int i;
+    for (i = 0; i < INT_MAX; i++)
     {
         comp.PC = 0;
         comp.regA = i;
@@ -212,18 +213,21 @@ int main()
                 int_vector_push_back(&output, res);
             }
 
-            if (output.length > program.length)
+            if (output.length > 0 && output.values[output.length - 1] != program.values[output.length - 1])
             {
                 break;
             }
         }
+    }
 
-        bool in_out_same = compare_vectors(&program, &output);
-        if (in_out_same)
-        {
-            printf("part 2 ans: %d\n", i);
-            break;
-        }
+    bool in_out_same = compare_vectors(&program, &output);
+    if (in_out_same)
+    {
+        printf("Part 2: ans is %d\n", i);
+    }
+    else
+    {
+        printf("Part 2: solution not in range tested\n");
     }
 
     free(inputs);
