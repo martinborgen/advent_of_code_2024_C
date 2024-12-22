@@ -121,6 +121,14 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/source/my_string.c
 )
 
+add_executable(
+    day17
+    ${PROJECT_SOURCE_DIR}/source/day17.c
+    ${PROJECT_SOURCE_DIR}/source/file_reader.c
+    ${PROJECT_SOURCE_DIR}/source/my_string.c
+    ${PROJECT_SOURCE_DIR}/source/vector.c
+)
+
 include(CTest)
 
 add_executable(
