@@ -59,7 +59,7 @@ int get_combo(int operand, struct computer *comp)
     }
 }
 
-void execute(int opcode, int operand, struct computer *comp)
+int execute(int opcode, int operand, struct computer *comp)
 {
 
     switch (opcode)
@@ -127,7 +127,7 @@ void execute(int opcode, int operand, struct computer *comp)
         // multiple values, they are separated by commas.)
 
         comp->PC += 2;
-        printf("%d,", get_combo(operand, comp) % 8);
+        return get_combo(operand, comp) % 8;
         break;
 
     case 6:
