@@ -15,12 +15,13 @@ part 2: find a value of register A such that the computer outputs a compy of the
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 
 #include "file_reader.h"
 #include "my_string.h"
 #include "vector.h"
 
-#define INPUTS_PATH "../inputs/day17.txt"
+#define INPUTS_PATH "../inputs/day17_sample2.txt"
 
 struct computer
 {
@@ -151,6 +152,8 @@ int execute(int opcode, int operand, struct computer *comp)
     default:
         break;
     }
+
+    return -1; // presumably the computer cannot return negative values, so this works as a null-value
 }
 
 bool compare_vectors(struct int_vector *a, struct int_vector *b)
@@ -181,6 +184,7 @@ int main()
     char *program_str = strstr(inputs, "Program: ") + 9;
 
     struct int_vector program = int_vector_new();
+    struct int_vector output = int_vector_new();
 
     char *token = strtok(program_str, ",");
     while (token)
@@ -190,11 +194,36 @@ int main()
         token = strtok(NULL, ",");
     }
 
-    while (comp.PC >= 0 && comp.PC < program.length - 1)
+    for (int i = 0; i < INT_MAX; i++)
     {
-        int opcode = program.values[comp.PC];
-        int operand = program.values[comp.PC + 1];
-        execute(opcode, operand, &comp);
+        comp.PC = 0;
+        comp.regA = i;
+        comp.regB = 0;
+        comp.regC = 0;
+        output.length = 0;
+
+        while (comp.PC >= 0 && comp.PC < program.length - 1)
+        {
+            int opcode = program.values[comp.PC];
+            int operand = program.values[comp.PC + 1];
+            int res = execute(opcode, operand, &comp);
+            if (res >= 0)
+            {
+                int_vector_push_back(&output, res);
+            }
+
+            if (output.length > program.length)
+            {
+                break;
+            }
+        }
+
+        bool in_out_same = compare_vectors(&program, &output);
+        if (in_out_same)
+        {
+            printf("part 2 ans: %d\n", i);
+            break;
+        }
     }
 
     free(inputs);
