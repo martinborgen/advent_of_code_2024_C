@@ -153,6 +153,23 @@ void execute(int opcode, int operand, struct computer *comp)
     }
 }
 
+bool compare_vectors(struct int_vector *a, struct int_vector *b)
+{
+    if (a->length != b->length)
+    {
+        return false;
+    }
+
+    for (int i = 0; i < a->length; i++)
+    {
+        if (a->values[i] != b->values[i])
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 int main()
 {
     char *inputs = file_reader(INPUTS_PATH);
