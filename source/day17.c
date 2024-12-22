@@ -1,3 +1,14 @@
+/*
+
+https://adventofcode.com/2024/day/17#part2
+
+make a computer according to specs.
+
+Part 1: find what the computer outputs.
+
+part 2: find a value of register A such that the computer outputs a compy of the program!
+
+ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -9,7 +20,7 @@
 #include "my_string.h"
 #include "vector.h"
 
-#define INPUTS_PATH "../inputs/day17_sample.txt"
+#define INPUTS_PATH "../inputs/day17.txt"
 
 struct computer
 {
