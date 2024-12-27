@@ -36,6 +36,7 @@ struct thread_args
     struct int_vector *program;
     size_t range_start, range_end;
     int64_t *retval;
+    pthread_mutex_t *retval_mutex;
 };
 
 int int_pow(int base, int exp)
@@ -206,6 +207,11 @@ void *find_A_reg(void *args)
     int64_t i;
     for (i = range_start; i < range_end; i++)
     {
+        if (*retval_ptr < i)
+        {
+            break;
+        }
+
         comp.PC = 0;
         comp.regA = i;
         comp.regB = 0;
@@ -253,12 +259,13 @@ void *find_A_reg(void *args)
     if (in_out_same)
     {
         printf("Part 2: ans is %ld\n", i);
-        *retval_ptr = i;
+        pthread_mutex_lock(args_struct->retval_mutex);
+        *retval_ptr = (i < *retval_ptr) ? i : *retval_ptr;
+        pthread_mutex_unlock(args_struct->retval_mutex);
     }
     else
     {
         printf("Part 2: solution not in range tested\n");
-        *retval_ptr = 0;
     }
     return 0;
 }
@@ -280,17 +287,27 @@ int main()
     }
     free(inputs);
 
-    pthread_t my1, my2;
-    int64_t res1, res2;
-    struct thread_args arg1 = {&program, 0, INT32_MAX / 2, &res1};
-    struct thread_args arg2 = {&program, INT32_MAX / 2 + 1, INT32_MAX, &res2};
+    pthread_mutex_t res_mutex;
+    pthread_mutex_init(&res_mutex, NULL);
+    int64_t res = INT64_MAX;
 
-    int t_res1 = pthread_create(&my1, NULL, find_A_reg, &arg1);
-    int t_res2 = pthread_create(&my2, NULL, find_A_reg, &arg2);
+    pthread_t my1, my2;
+    struct thread_args arg1 = {&program,
+                               0,
+                               INT32_MAX / 2,
+                               &res,
+                               &res_mutex};
+    struct thread_args arg2 = {&program,
+                               INT32_MAX / 2 + 1,
+                               INT32_MAX,
+                               &res,
+                               &res_mutex};
+
+    pthread_create(&my1, NULL, find_A_reg, &arg1);
+    pthread_create(&my2, NULL, find_A_reg, &arg2);
 
     pthread_join(my1, NULL);
     pthread_join(my2, NULL);
 
-    int64_t res = (res1 < res2) ? res1 : res2;
     printf("res is %ld", res);
 }
