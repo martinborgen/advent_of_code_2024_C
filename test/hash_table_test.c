@@ -44,4 +44,13 @@ int main()
         printf("get/set error on collision, got %lu, but expected 123\n", res4);
         output--;
     }
+
+    bool res5 = hash_table_contains(hash_table_rows + 2, hash_table_rows, table);
+    if (!res5)
+    {
+        printf("get/set error on contains, got false, but expected true");
+        output--;
+    }
+
+    hash_table_clear(hash_table_rows, table);
 }
