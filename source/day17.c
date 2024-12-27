@@ -25,7 +25,7 @@ part 2: find a value of register A such that the computer outputs a compy of the
 
 struct computer
 {
-    int regA, regB, regC, PC;
+    int64_t regA, regB, regC, PC;
 };
 
 int int_pow(int base, int exp)
@@ -178,7 +178,7 @@ int main()
     char *inputs = file_reader(INPUTS_PATH);
 
     struct computer comp;
-    sscanf(inputs, "Register A: %d\nRegister B: %d\nRegister C: %d", &comp.regA, &comp.regB, &comp.regC);
+    sscanf(inputs, "Register A: %ld\nRegister B: %ld\nRegister C: %ld", &comp.regA, &comp.regB, &comp.regC);
     comp.PC = 0;
 
     char *program_str = strstr(inputs, "Program: ") + 9;
@@ -202,8 +202,8 @@ int main()
     }
 
     bool in_out_same;
-    int i;
-    for (i = 0; i < INT_MAX; i++)
+    int64_t i;
+    for (i = INT32_MAX; i < INT64_MAX; i++)
     {
         comp.PC = 0;
         comp.regA = i;
@@ -251,7 +251,7 @@ int main()
 
     if (in_out_same)
     {
-        printf("Part 2: ans is %d\n", i);
+        printf("Part 2: ans is %ld\n", i);
     }
     else
     {
