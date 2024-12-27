@@ -16,12 +16,15 @@ part 2: find a value of register A such that the computer outputs a compy of the
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <pthread.h>
 
 #include "file_reader.h"
 #include "my_string.h"
 #include "vector.h"
 
 #define INPUTS_PATH "../inputs/day17_sample2.txt"
+
+#define THREADS_COUNT 12
 
 struct computer
 {
@@ -173,37 +176,21 @@ bool compare_vectors(struct int_vector *a, struct int_vector *b)
     return true;
 }
 
-int main()
+// worker function that will try to find an comp->regA such that output == input within range_start and range_end.
+int64_t find_A_reg(struct int_vector *program, size_t range_start, size_t range_end)
 {
-    char *inputs = file_reader(INPUTS_PATH);
-
     struct computer comp;
-    sscanf(inputs, "Register A: %ld\nRegister B: %ld\nRegister C: %ld", &comp.regA, &comp.regB, &comp.regC);
-    comp.PC = 0;
-
-    char *program_str = strstr(inputs, "Program: ") + 9;
-
-    struct int_vector program = int_vector_new();
     struct int_vector output = int_vector_new();
-
-    char *token = strtok(program_str, ",");
-    while (token)
-    {
-        int32_t instruction = atoi(token);
-        int_vector_push_back(&program, instruction);
-        token = strtok(NULL, ",");
-    }
-
     // each index corresponds to the PC, the value is the ammount of added outputs. -1 means unvisited PC
-    int32_t *added_hash = malloc(sizeof(int32_t) * program.length);
-    for (size_t i = 0; i < program.length; i++)
+    int32_t *added_hash = malloc(sizeof(int32_t) * program->length);
+    for (size_t i = 0; i < program->length; i++)
     {
         added_hash[i] = -1;
     }
 
     bool in_out_same;
     int64_t i;
-    for (i = INT32_MAX; i < INT64_MAX; i++)
+    for (i = range_start; i < range_end; i++)
     {
         comp.PC = 0;
         comp.regA = i;
@@ -213,10 +200,10 @@ int main()
 
         int added = 0;
         // printf("i: %d\n", i);
-        while (comp.PC >= 0 && comp.PC < program.length - 1)
+        while (comp.PC >= 0 && comp.PC < program->length - 1)
         {
-            int opcode = program.values[comp.PC];
-            int operand = program.values[comp.PC + 1];
+            int opcode = program->values[comp.PC];
+            int operand = program->values[comp.PC + 1];
             int this_pc = comp.PC;
             int res = execute(opcode, operand, &comp);
             if (res >= 0)
@@ -225,7 +212,7 @@ int main()
                 added++;
             }
 
-            if ((output.length > 0 && output.values[output.length - 1] != program.values[output.length - 1]) ||
+            if ((output.length > 0 && output.values[output.length - 1] != program->values[output.length - 1]) ||
                 (added_hash[this_pc] == added))
             {
                 // if the recent output is a mismatch w. what we're looking for,
@@ -237,13 +224,13 @@ int main()
             added_hash[this_pc] = added;
         }
 
-        in_out_same = compare_vectors(&program, &output);
+        in_out_same = compare_vectors(program, &output);
         if (in_out_same)
         {
             break;
         }
 
-        for (size_t j = 0; j < program.length; j++)
+        for (size_t j = 0; j < program->length; j++)
         {
             added_hash[j] = -1;
         }
@@ -252,12 +239,32 @@ int main()
     if (in_out_same)
     {
         printf("Part 2: ans is %ld\n", i);
+        return i;
     }
     else
     {
         printf("Part 2: solution not in range tested\n");
+        return 0;
     }
+}
 
+int main()
+{
+    char *inputs = file_reader(INPUTS_PATH);
+
+    char *program_str = strstr(inputs, "Program: ") + 9;
+
+    struct int_vector program = int_vector_new();
+
+    char *token = strtok(program_str, ",");
+    while (token)
+    {
+        int32_t instruction = atoi(token);
+        int_vector_push_back(&program, instruction);
+        token = strtok(NULL, ",");
+    }
     free(inputs);
-    return 0;
+
+    int64_t res = find_A_reg(&program, 0, INT32_MAX);
+    printf("res is %ld", res);
 }
