@@ -31,6 +31,13 @@ struct computer
     int64_t regA, regB, regC, PC;
 };
 
+struct thread_args
+{
+    struct int_vector *program;
+    size_t range_start, range_end;
+    int64_t *retval;
+};
+
 int int_pow(int base, int exp)
 {
     int out = 1;
@@ -177,8 +184,15 @@ bool compare_vectors(struct int_vector *a, struct int_vector *b)
 }
 
 // worker function that will try to find an comp->regA such that output == input within range_start and range_end.
-int64_t find_A_reg(struct int_vector *program, size_t range_start, size_t range_end)
+void *find_A_reg(void *args)
 {
+    // unpacking of the args
+    struct thread_args *args_struct = (struct thread_args *)args;
+    struct int_vector *program = args_struct->program;
+    size_t range_start = args_struct->range_start;
+    size_t range_end = args_struct->range_end;
+    int64_t *retval_ptr = args_struct->retval;
+
     struct computer comp;
     struct int_vector output = int_vector_new();
     // each index corresponds to the PC, the value is the ammount of added outputs. -1 means unvisited PC
@@ -239,13 +253,14 @@ int64_t find_A_reg(struct int_vector *program, size_t range_start, size_t range_
     if (in_out_same)
     {
         printf("Part 2: ans is %ld\n", i);
-        return i;
+        *retval_ptr = i;
     }
     else
     {
         printf("Part 2: solution not in range tested\n");
-        return 0;
+        *retval_ptr = 0;
     }
+    return 0;
 }
 
 int main()
@@ -265,6 +280,17 @@ int main()
     }
     free(inputs);
 
-    int64_t res = find_A_reg(&program, 0, INT32_MAX);
+    pthread_t my1, my2;
+    int64_t res1, res2;
+    struct thread_args arg1 = {&program, 0, INT32_MAX / 2, &res1};
+    struct thread_args arg2 = {&program, INT32_MAX / 2 + 1, INT32_MAX, &res2};
+
+    int t_res1 = pthread_create(&my1, NULL, find_A_reg, &arg1);
+    int t_res2 = pthread_create(&my2, NULL, find_A_reg, &arg2);
+
+    pthread_join(my1, NULL);
+    pthread_join(my2, NULL);
+
+    int64_t res = (res1 < res2) ? res1 : res2;
     printf("res is %ld", res);
 }
