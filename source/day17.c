@@ -25,8 +25,8 @@ part 2: find a value of register A such that the computer outputs a compy of the
 #define INPUTS_PATH "../inputs/day17.txt"
 
 #define THREADS_COUNT 12
-#define RANGE_START INT32_MAX
-#define RANGE_END INT64_MAX
+#define RANGE_START 109019476320651
+#define RANGE_END 109019476340651
 
 struct computer
 {
@@ -36,7 +36,7 @@ struct computer
 struct thread_args
 {
     struct int_vector *program;
-    size_t range_start, range_end;
+    int64_t range_start, range_end;
     int64_t *retval;
     pthread_mutex_t *retval_mutex;
 };
@@ -192,8 +192,8 @@ void *find_A_reg(void *args)
     // unpacking of the args
     struct thread_args *args_struct = (struct thread_args *)args;
     struct int_vector *program = args_struct->program;
-    size_t range_start = args_struct->range_start;
-    size_t range_end = args_struct->range_end;
+    int64_t range_start = args_struct->range_start;
+    int64_t range_end = args_struct->range_end;
     int64_t *retval_ptr = args_struct->retval;
 
     struct computer comp;
@@ -227,15 +227,20 @@ void *find_A_reg(void *args)
             int opcode = program->values[comp.PC];
             int operand = program->values[comp.PC + 1];
             int this_pc = comp.PC;
-            int res = execute(opcode, operand, &comp);
+            int64_t res = execute(opcode, operand, &comp);
             if (res >= 0)
             {
+                if (res > INT_MAX)
+                {
+                    printf("Error OVERFLOW!");
+                }
                 int_vector_push_back(&output, res);
                 added++;
             }
 
             if ((output.length > 0 && output.values[output.length - 1] != program->values[output.length - 1]) ||
-                (added_hash[this_pc] == added))
+                (added_hash[this_pc] == added) ||
+                (output.length > program->length))
             {
                 // if the recent output is a mismatch w. what we're looking for,
                 // or if we've been at this PC and haven't added anything since
@@ -300,15 +305,15 @@ int main()
     {
         thread_args[i] = (struct thread_args){
             &program,
-            slice * i + 1,
-            slice * (i + 1),
+            RANGE_START + slice * i + 1,
+            RANGE_START + slice * (i + 1),
             &res,
             &res_mutex,
         };
     }
     thread_args[THREADS_COUNT - 1] = (struct thread_args){
         &program,
-        slice * (THREADS_COUNT - 1) + 1,
+        RANGE_START + slice * (THREADS_COUNT - 1) + 1,
         RANGE_END,
         &res,
         &res_mutex,
