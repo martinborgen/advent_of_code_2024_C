@@ -25,7 +25,7 @@ part 2: find a value of register A such that the computer outputs a compy of the
 #define INPUTS_PATH "../inputs/day17.txt"
 
 #define THREADS_COUNT 12
-#define RANGE_START 109019476320651
+#define RANGE_START INT32_MAX
 #define RANGE_END 109019476340651
 
 struct computer
