@@ -77,7 +77,7 @@ int execute(int opcode, int operand, struct computer *comp)
         // the A register.
 
         comp->regA = comp->regA / int_pow(2, get_combo(operand, comp));
-        comp->PC += 2;
+        comp->PC++;
         break;
 
     case 1:
@@ -86,7 +86,7 @@ int execute(int opcode, int operand, struct computer *comp)
         // B.
 
         comp->regB ^= operand;
-        comp->PC += 2;
+        comp->PC++;
         break;
 
     case 2:
@@ -95,7 +95,7 @@ int execute(int opcode, int operand, struct computer *comp)
         // to the B register.
 
         comp->regB = get_combo(operand, comp) % 8;
-        comp->PC += 2;
+        comp->PC++;
         break;
 
     case 3:
@@ -107,7 +107,7 @@ int execute(int opcode, int operand, struct computer *comp)
 
         if (comp->regA == 0)
         {
-            comp->PC += 2;
+            comp->PC++;
             break;
         }
         else
@@ -122,7 +122,7 @@ int execute(int opcode, int operand, struct computer *comp)
         // reasons, this instruction reads an operand but ignores it.)
 
         comp->regB = comp->regB ^ comp->regC;
-        comp->PC += 2;
+        comp->PC++;
         break;
 
     case 5:
@@ -130,7 +130,7 @@ int execute(int opcode, int operand, struct computer *comp)
         // operand modulo 8, then outputs that value. (If a program outputs
         // multiple values, they are separated by commas.)
 
-        comp->PC += 2;
+        comp->PC++;
         return get_combo(operand, comp) % 8;
         break;
 
@@ -140,7 +140,7 @@ int execute(int opcode, int operand, struct computer *comp)
         // still read from the A register.)
 
         comp->regB = comp->regA / int_pow(2, get_combo(operand, comp));
-        comp->PC += 2;
+        comp->PC++;
         break;
 
     case 7:
@@ -149,7 +149,7 @@ int execute(int opcode, int operand, struct computer *comp)
         // still read from the A register.)
 
         comp->regC = comp->regA / int_pow(2, get_combo(operand, comp));
-        comp->PC += 2;
+        comp->PC++;
         break;
 
     default:
@@ -176,76 +176,37 @@ bool compare_vectors(struct int_vector *a, struct int_vector *b)
     return true;
 }
 
-// worker function that will try to find an comp->regA such that output == input within range_start and range_end.
-int64_t find_A_reg(struct int_vector *program, size_t range_start, size_t range_end)
+void execute_octal(struct int_vector *program, struct int_vector *output, struct computer *comp)
 {
-    struct computer comp;
-    struct int_vector output = int_vector_new();
-    // each index corresponds to the PC, the value is the ammount of added outputs. -1 means unvisited PC
     int32_t *added_hash = malloc(sizeof(int32_t) * program->length);
     for (size_t i = 0; i < program->length; i++)
     {
         added_hash[i] = -1;
     }
 
-    bool in_out_same;
-    int64_t i;
-    for (i = range_start; i < range_end; i++)
+    size_t added = 0;
+    while (comp->PC >= 0 && comp->PC < program->length)
     {
-        comp.PC = 0;
-        comp.regA = i;
-        comp.regB = 0;
-        comp.regC = 0;
-        output.length = 0; // setting this effectively clears the vector without resize
-
-        int added = 0;
-        // printf("i: %d\n", i);
-        while (comp.PC >= 0 && comp.PC < program->length - 1)
+        int opcode = program->values[comp->PC] / 10;
+        int operand = program->values[comp->PC] % 10;
+        int this_pc = comp->PC;
+        int res = execute(opcode, operand, comp);
+        if (res >= 0)
         {
-            int opcode = program->values[comp.PC];
-            int operand = program->values[comp.PC + 1];
-            int this_pc = comp.PC;
-            int res = execute(opcode, operand, &comp);
-            if (res >= 0)
-            {
-                int_vector_push_back(&output, res);
-                added++;
-            }
-
-            if ((output.length > 0 && output.values[output.length - 1] != program->values[output.length - 1]) ||
-                (added_hash[this_pc] == added))
-            {
-                // if the recent output is a mismatch w. what we're looking for,
-                // or if we've been at this PC and haven't added anything since
-                // printf("break due to loop\n");
-                break;
-            }
-
-            added_hash[this_pc] = added;
+            int_vector_push_back(output, res);
+            added++;
         }
 
-        in_out_same = compare_vectors(program, &output);
-        if (in_out_same)
+        if (added_hash[this_pc] == added)
         {
+            // if we've been at this PC and haven't added anything since
+            output->length = 0;
             break;
         }
 
-        for (size_t j = 0; j < program->length; j++)
-        {
-            added_hash[j] = -1;
-        }
+        added_hash[this_pc] = added;
     }
-
-    if (in_out_same)
-    {
-        printf("Part 2: ans is %ld\n", i);
-        return i;
-    }
-    else
-    {
-        printf("Part 2: solution not in range tested\n");
-        return 0;
-    }
+    // return output;
 }
 
 int main()
@@ -255,11 +216,13 @@ int main()
     char *program_str = strstr(inputs, "Program: ") + 9;
 
     struct int_vector program = int_vector_new();
-
     char *token = strtok(program_str, ",");
     while (token)
     {
         int32_t instruction = atoi(token);
+        token = strtok(NULL, ",");
+        instruction *= 10;
+        instruction += atoi(token);
         int_vector_push_back(&program, instruction);
         token = strtok(NULL, ",");
     }
