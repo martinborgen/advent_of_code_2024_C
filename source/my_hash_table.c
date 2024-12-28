@@ -72,6 +72,11 @@ uint64_t hash_table_get(uint64_t key, size_t hash_table_rows, hash_node *hash_ta
 bool hash_table_contains(uint64_t key, size_t hash_table_size, hash_node **hash_table)
 {
     hash_node *node = hash_table[key % hash_table_size];
+    while (node != NULL && node->key != key)
+    {
+        node = node->next;
+    }
+
     return node != NULL;
 }
 
