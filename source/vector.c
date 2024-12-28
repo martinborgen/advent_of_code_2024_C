@@ -120,3 +120,25 @@ void int_vector_destruct(struct int_vector *vec)
     vec->length = 0;
     vec->capacity = 0;
 }
+
+int64_t int_vector_to_int10(struct int_vector *vec)
+{
+    int64_t output = 0;
+    for (size_t i = 0; i < vec->length; i++)
+    {
+        output *= 10;
+        output += vec->values[i];
+    }
+    return output;
+}
+
+int64_t int_vector_to_int_base(struct int_vector *vec, int base)
+{
+    int64_t output = 0;
+    for (size_t i = 0; i < vec->length; i++)
+    {
+        output *= base;
+        output += vec->values[i];
+    }
+    return output;
+}

@@ -1,6 +1,8 @@
 #ifndef _AOC_VECTOR_H
 #define _AOC_VECTOR_H
 
+#include <stdint.h>
+
 /*
 An heap-allocated array, bundled with its' length and capacity for convenience.
 `size_t length` - The number of elements that has been pushed to the vector.
@@ -43,5 +45,11 @@ struct int_vector int_vector_new();
 
 /* Free's the values, set all values to NULL or zero */
 void int_vector_destruct(struct int_vector *vec);
+
+/* Returns an int formed from vec, in base 10 */
+int64_t int_vector_to_int10(struct int_vector *vec);
+
+/* Returns an int formed from vec in base */
+int64_t int_vector_to_int_base(struct int_vector *vec, int base);
 
 #endif
