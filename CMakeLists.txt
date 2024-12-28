@@ -127,6 +127,7 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/source/file_reader.c
     ${PROJECT_SOURCE_DIR}/source/my_string.c
     ${PROJECT_SOURCE_DIR}/source/vector.c
+    ${PROJECT_SOURCE_DIR}/source/my_q.c
 )
 
 include(CTest)

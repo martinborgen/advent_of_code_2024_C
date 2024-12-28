@@ -21,6 +21,7 @@ part 2: find a value of register A such that the computer outputs a compy of the
 #include "file_reader.h"
 #include "my_string.h"
 #include "vector.h"
+#include "my_q.h"
 
 #define INPUTS_PATH "../inputs/day17_sample2.txt"
 
@@ -228,6 +229,79 @@ int main()
     }
     free(inputs);
 
-    int64_t res = find_A_reg(&program, 0, INT32_MAX);
-    printf("res is %ld", res);
+    // backtracking with queue
+    struct int_vector output = int_vector_new();
+    qnode_t *q = NULL;
+    size_t no_in_gen = 0; // this is to keep track of 'generations' in q
+    size_t no_in_next_gen = 0;
+
+    // first pass to fill queue with some values
+    for (int i = 0; i < 0x40; i++)
+    {
+        struct computer comp = {.regA = i};
+
+        execute_octal(&program, &output, &comp);
+
+        int res = int_vector_to_int10(&output);
+        printf("res is %d for i: %d\n", res, i);
+        if (res == program.values[program.length - 1])
+        {
+            q = queue_push(q, i);
+            no_in_gen++;
+        }
+
+        int_vector_set_capacity(&output, 0);
+    }
+
+    // then loop until q is empty
+    int32_t octal = program.length - 2;
+    while (q != NULL)
+    {
+        // pop number, calculate target
+        int64_t a = queue_pop(&q) << 6;
+        int64_t target = 0;
+        for (int32_t j = octal; j < program.length; j++)
+        {
+            target *= 100;
+            target += program.values[j];
+        }
+
+        for (int i = 0; i < 0x40; i++)
+        {
+            struct computer comp = {.regA = a + i};
+
+            execute_octal(&program, &output, &comp);
+
+            int64_t res = int_vector_to_int10(&output);
+            if (res == target)
+            {
+                q = queue_push(q, a + i);
+                no_in_next_gen++;
+                printf("res is %ld for %ld\n", res, a + i);
+            }
+
+            int_vector_set_capacity(&output, 0);
+        }
+
+        // decrease octal for next iteration if we've just 'exhausted' that position
+        no_in_gen--;
+        if (no_in_gen == 0)
+        {
+            octal--;
+            no_in_gen = no_in_next_gen;
+            no_in_next_gen = 0;
+        }
+
+        if (octal < 0)
+        {
+            break;
+        }
+    }
+    printf("Solution to part 2: %ld\n", queue_pop(&q));
+    while (q != NULL)
+    {
+        queue_pop(&q);
+    }
+    int_vector_destruct(&program);
+    int_vector_destruct(&output);
 }
