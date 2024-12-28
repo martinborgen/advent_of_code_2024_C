@@ -41,9 +41,9 @@ struct thread_args
     pthread_mutex_t *retval_mutex;
 };
 
-int int_pow(int base, int exp)
+int64_t int_pow(int64_t base, int64_t exp)
 {
-    int out = 1;
+    int64_t out = 1;
     for (int i = 0; i < exp; i++)
     {
         out *= base;
@@ -51,7 +51,7 @@ int int_pow(int base, int exp)
     return out;
 }
 
-int get_combo(int operand, struct computer *comp)
+int64_t get_combo(int operand, struct computer *comp)
 {
     switch (operand)
     {
@@ -73,7 +73,7 @@ int get_combo(int operand, struct computer *comp)
     }
 }
 
-int execute(int opcode, int operand, struct computer *comp)
+int64_t execute(int opcode, int operand, struct computer *comp)
 {
 
     switch (opcode)
