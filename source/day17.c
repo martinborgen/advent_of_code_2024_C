@@ -23,16 +23,14 @@ part 2: find a value of register A such that the computer outputs a compy of the
 #include "vector.h"
 #include "my_q.h"
 
-#define INPUTS_PATH "../inputs/day17_sample2.txt"
-
-#define THREADS_COUNT 12
+#define INPUTS_PATH "../inputs/day17.txt"
 
 struct computer
 {
     int64_t regA, regB, regC, PC;
 };
 
-int int_pow(int base, int exp)
+int64_t int_pow(int64_t base, int64_t exp)
 {
     int out = 1;
     for (int i = 0; i < exp; i++)
@@ -42,7 +40,7 @@ int int_pow(int base, int exp)
     return out;
 }
 
-int get_combo(int operand, struct computer *comp)
+int64_t get_combo(int operand, struct computer *comp)
 {
     switch (operand)
     {
@@ -64,7 +62,7 @@ int get_combo(int operand, struct computer *comp)
     }
 }
 
-int execute(int opcode, int operand, struct computer *comp)
+int64_t execute(int opcode, int operand, struct computer *comp)
 {
 
     switch (opcode)
@@ -191,9 +189,13 @@ void execute_octal(struct int_vector *program, struct int_vector *output, struct
         int opcode = program->values[comp->PC] / 10;
         int operand = program->values[comp->PC] % 10;
         int this_pc = comp->PC;
-        int res = execute(opcode, operand, comp);
+        int64_t res = execute(opcode, operand, comp);
         if (res >= 0)
         {
+            if (res > INT32_MAX)
+            {
+                printf("ERROR, integer overflow in execute octal!");
+            }
             int_vector_push_back(output, res);
             added++;
         }
