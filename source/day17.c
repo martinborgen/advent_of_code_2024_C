@@ -22,9 +22,11 @@ part 2: find a value of register A such that the computer outputs a compy of the
 #include "my_string.h"
 #include "vector.h"
 
-#define INPUTS_PATH "../inputs/day17_sample2.txt"
+#define INPUTS_PATH "../inputs/day17.txt"
 
 #define THREADS_COUNT 12
+#define RANGE_START INT32_MAX
+#define RANGE_END INT64_MAX
 
 struct computer
 {
@@ -265,7 +267,7 @@ void *find_A_reg(void *args)
     }
     else
     {
-        printf("Part 2: solution not in range tested\n");
+        printf("Part 2: solution not in range tested (%ld, %ld)\n", range_start, range_end);
     }
     return 0;
 }
@@ -291,23 +293,36 @@ int main()
     pthread_mutex_init(&res_mutex, NULL);
     int64_t res = INT64_MAX;
 
-    pthread_t my1, my2;
-    struct thread_args arg1 = {&program,
-                               0,
-                               INT32_MAX / 2,
-                               &res,
-                               &res_mutex};
-    struct thread_args arg2 = {&program,
-                               INT32_MAX / 2 + 1,
-                               INT32_MAX,
-                               &res,
-                               &res_mutex};
+    pthread_t thread_ids[THREADS_COUNT];
+    struct thread_args thread_args[THREADS_COUNT];
+    const int64_t slice = (RANGE_END - RANGE_START) / THREADS_COUNT;
+    for (int i = 0; i < THREADS_COUNT - 1; i++)
+    {
+        thread_args[i] = (struct thread_args){
+            &program,
+            slice * i + 1,
+            slice * (i + 1),
+            &res,
+            &res_mutex,
+        };
+    }
+    thread_args[THREADS_COUNT - 1] = (struct thread_args){
+        &program,
+        slice * (THREADS_COUNT - 1) + 1,
+        RANGE_END,
+        &res,
+        &res_mutex,
+    };
 
-    pthread_create(&my1, NULL, find_A_reg, &arg1);
-    pthread_create(&my2, NULL, find_A_reg, &arg2);
+    for (int i = 0; i < THREADS_COUNT; i++)
+    {
+        pthread_create(&(thread_ids[i]), NULL, find_A_reg, &(thread_args[i]));
+    }
 
-    pthread_join(my1, NULL);
-    pthread_join(my2, NULL);
+    for (int i = 0; i < THREADS_COUNT; i++)
+    {
+        pthread_join(thread_ids[i], NULL);
+    }
 
     printf("res is %ld", res);
 }
