@@ -11,8 +11,16 @@
 #include "my_linalg.h"
 
 // NOTE: Change SIDE_LENGTH when switching between sample and real input!
+
 #define INPUTS_PATH "../inputs/day18_sample.txt"
-#define SIDE_LENGTH 7
+#define SIDE_LENGTH 7 // It is 7 for sample, 71 for real
+#define TIME_PART1 12 // It is 12 for sample, 1024 for real
+
+typedef struct q_node
+{
+    tuple pos;
+    struct q_node *next;
+} q_node;
 
 typedef struct board_struct
 {
@@ -23,23 +31,69 @@ typedef struct board_struct
     tuple end;
 } board_t;
 
-uint32_t dfs_search(tuple here, uint32_t acc_cost, board_t *board, bool *visited)
+int64_t scorefun(tuple pos)
 {
+    return pos.x * pos.x + pos.y * pos.y;
+}
+
+void priq_insert(q_node **q, tuple pos)
+{
+    if (*q == NULL)
+    {
+        (*q) = malloc(sizeof(q_node));
+        (*q)->next = NULL;
+        (*q)->pos = pos;
+        return;
+    }
+
+    int64_t pos_score = scorefun(pos);
+    if (scorefun((*q)->pos) < pos_score)
+    {
+        q_node *tmp = *q;
+        *q = malloc(sizeof(q_node));
+        (*q)->next = tmp;
+        (*q)->pos = pos;
+        return;
+    }
+
+    q_node *current = *q;
+    int64_t current_score = scorefun(current->pos);
+
+    while (current->next != NULL && current_score > pos_score)
+    {
+        current = current->next;
+        current_score = scorefun(current->pos);
+    }
+
+    q_node *tmp_next = current->next;
+    current->next = malloc(sizeof(q_node));
+    current->next->pos = pos;
+    current->next->next = tmp_next;
+}
+
+tuple priq_pop(q_node **q)
+{
+    tuple ret = (*q)->pos;
+    q_node *tmp = *q;
+    *q = (*q)->next;
+    free(tmp);
+    return ret;
+}
+
+void bfs_search(q_node **prioq, board_t *board, bool *visited)
+{
+    tuple here = priq_pop(prioq);
     // if we're at the end
     if (tuple_eq(here, board->end))
     {
-        board->cost[here.y * board->rows + here.x] = acc_cost;
-        return acc_cost;
+        return;
     }
 
-    tuple look_dirs[] = {{-1, 0},
+    tuple look_dirs[] = {{0, 1},
                          {1, 0},
                          {0, -1},
-                         {0, 1}};
+                         {-1, 0}};
 
-    visited[here.y * board->rows + here.x] = true;
-    uint32_t min_fork = UINT32_MAX;
-    // look up, down, left and right.
     for (size_t i = 0; i < sizeof(look_dirs) / sizeof(tuple); i++)
     {
         tuple look_pos = tuple_add(look_dirs[i], here);
@@ -56,24 +110,15 @@ uint32_t dfs_search(tuple here, uint32_t acc_cost, board_t *board, bool *visited
             continue;
         }
 
-        uint32_t look_end_cost = board->cost[look_pos.y * board->rows + look_pos.x];
-        uint32_t cost_from_here = acc_cost + 1;
-        if (cost_from_here <= look_end_cost)
+        uint32_t look_cost = board->cost[look_pos.y * board->rows + look_pos.x];
+        uint32_t cost_from_here = board->cost[here.y * board->rows + here.x] + 1;
+        if (cost_from_here <= look_cost)
         {
-            uint32_t fork_depth = dfs_search(look_pos, cost_from_here, board, visited);
-            if (fork_depth <= board->cost[here.y * board->rows + here.x])
-            {
-                board->cost[here.y * board->rows + here.x] = fork_depth;
-            }
-
-            if (fork_depth <= min_fork)
-            {
-                min_fork = fork_depth;
-            }
+            board->cost[look_pos.y * board->rows + look_pos.x] = cost_from_here;
+            visited[look_pos.y * board->rows + look_pos.x] = true;
+            priq_insert(prioq, look_pos);
         }
     }
-    visited[here.y * board->rows + here.x] = false;
-    return min_fork;
 }
 
 // Note: this assumes time from start. It will do all inputs from start to time.
@@ -147,14 +192,24 @@ int main()
     board.end = (tuple){SIDE_LENGTH - 1, SIDE_LENGTH - 1};
     board.maze = maze;
 
+    visited[board.start.y * board.rows + board.start.x] = true;
+    board.cost[board.start.y * board.rows + board.start.x] = 0;
+
     print_arr(board.rows, board.cols, board.maze);
 
-    calc_falling_data(12, inputs, &board);
+    calc_falling_data(TIME_PART1, inputs, &board);
 
     print_arr(board.rows, board.cols, board.maze);
 
-    uint32_t res = dfs_search(board.start, 0, &board, visited);
-
+    q_node *prioq = NULL;
+    priq_insert(&prioq, board.start);
+    while (prioq != NULL)
+    {
+        printf("%ld,%ld\n", prioq->pos.y, prioq->pos.x);
+        bfs_search(&prioq, &board, visited);
+    }
+    uint32_t res = board.cost[board.end.y * board.rows + board.end.x];
     print_board_w_visited(&board, visited);
+    printf("res is: %d\n", res);
     return 0;
 }
