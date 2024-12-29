@@ -80,7 +80,7 @@ tuple priq_pop(q_node **q)
     return ret;
 }
 
-void bfs_search(q_node **prioq, board_t *board, bool *visited)
+void bfs_search(q_node **prioq, board_t *board)
 {
     tuple here = priq_pop(prioq);
     // if we're at the end
@@ -97,15 +97,8 @@ void bfs_search(q_node **prioq, board_t *board, bool *visited)
     for (size_t i = 0; i < sizeof(look_dirs) / sizeof(tuple); i++)
     {
         tuple look_pos = tuple_add(look_dirs[i], here);
-        if (look_pos.x < 0 || look_pos.y < 0 || look_pos.x >= SIDE_LENGTH || look_pos.y >= SIDE_LENGTH)
-        {
-            continue;
-        }
-
         char look_char = board->maze[look_pos.y * board->rows + look_pos.x];
-        bool look_visited = visited[look_pos.y * board->rows + look_pos.x];
-
-        if (look_char == '#' || look_visited)
+        if (look_pos.x < 0 || look_pos.y < 0 || look_pos.x >= SIDE_LENGTH || look_pos.y >= SIDE_LENGTH || look_char == '#')
         {
             continue;
         }
@@ -115,7 +108,6 @@ void bfs_search(q_node **prioq, board_t *board, bool *visited)
         if (cost_from_here <= look_cost)
         {
             board->cost[look_pos.y * board->rows + look_pos.x] = cost_from_here;
-            visited[look_pos.y * board->rows + look_pos.x] = true;
             priq_insert(prioq, look_pos);
         }
     }
@@ -131,25 +123,6 @@ void calc_falling_data(size_t time, char *inputs, board_t *board)
         sscanf(token, "%lu,%lu", &x, &y);
         board->maze[y * SIDE_LENGTH + x] = '#';
         token = strtok(NULL, "\n");
-    }
-}
-
-void print_board_w_visited(board_t *board, bool *visited)
-{
-    for (size_t i = 0; i < board->rows; i++)
-    {
-        for (size_t j = 0; j < board->cols; j++)
-        {
-            if (visited[i * board->rows + j])
-            {
-                printf("%c", 'O');
-            }
-            else
-            {
-                printf("%c", board->maze[i * board->rows + j]);
-            }
-        }
-        printf("\n");
     }
 }
 
@@ -172,7 +145,6 @@ int main()
 
     char *maze = malloc(sizeof(char) * SIDE_LENGTH * SIDE_LENGTH);
     uint32_t *costs = malloc(sizeof(uint32_t) * SIDE_LENGTH * SIDE_LENGTH);
-    bool *visited = malloc(sizeof(bool) * SIDE_LENGTH * SIDE_LENGTH);
 
     for (size_t i = 0; i < SIDE_LENGTH; i++)
     {
@@ -180,7 +152,6 @@ int main()
         {
             maze[i * SIDE_LENGTH + j] = '.';
             costs[i * SIDE_LENGTH + j] = UINT32_MAX;
-            visited[i * SIDE_LENGTH + j] = false;
         }
     }
 
@@ -192,7 +163,6 @@ int main()
     board.end = (tuple){SIDE_LENGTH - 1, SIDE_LENGTH - 1};
     board.maze = maze;
 
-    visited[board.start.y * board.rows + board.start.x] = true;
     board.cost[board.start.y * board.rows + board.start.x] = 0;
 
     print_arr(board.rows, board.cols, board.maze);
@@ -206,10 +176,10 @@ int main()
     while (prioq != NULL)
     {
         printf("%ld,%ld\n", prioq->pos.y, prioq->pos.x);
-        bfs_search(&prioq, &board, visited);
+        bfs_search(&prioq, &board);
     }
     uint32_t res = board.cost[board.end.y * board.rows + board.end.x];
-    print_board_w_visited(&board, visited);
+    // print_board_w_visited(&board, visited);
     printf("res is: %d\n", res);
     return 0;
 }
