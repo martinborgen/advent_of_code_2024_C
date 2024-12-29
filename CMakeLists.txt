@@ -130,6 +130,14 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/source/my_q.c
 )
 
+add_executable(
+    day18
+    ${PROJECT_SOURCE_DIR}/source/day18.c
+    ${PROJECT_SOURCE_DIR}/source/file_reader.c
+    ${PROJECT_SOURCE_DIR}/source/my_string.c
+    ${PROJECT_SOURCE_DIR}/source/my_linalg.c
+)
+
 include(CTest)
 
 add_executable(
