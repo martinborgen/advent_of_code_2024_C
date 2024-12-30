@@ -176,6 +176,7 @@ void print_board(board_t *board)
 int main()
 {
     char *inputs = file_reader(INPUTS_PATH);
+    size_t time_max = strcnt(inputs, "\n");
 
     char *maze = malloc(sizeof(char) * SIDE_LENGTH * SIDE_LENGTH);
     uint32_t *costs = malloc(sizeof(uint32_t) * SIDE_LENGTH * SIDE_LENGTH);
@@ -201,11 +202,39 @@ int main()
 
     print_board(&board);
 
-    calc_falling_data(TIME_PART1, inputs, &board);
-
+    // Part 1:
+    char *inputs_part2 = calc_falling_data(TIME_PART1, inputs, &board); // not overwriting inputs* ptr so it can be used for free() later
     print_board(&board);
-    uint32_t res = a_star(&board);
+    uint32_t res_part1 = a_star(&board);
 
-    printf("res is: %d\n", res);
+    printf("res part 1 is: %d\n", res_part1);
+    // Part 2:
+    uint32_t res_part2 = 0;
+    uint32_t time_part2 = 0;
+    for (size_t time = TIME_PART1; time < time_max - 1; time++)
+    {
+        // reset costs, keep board otherwise
+        for (size_t i = 0; i < SIDE_LENGTH; i++)
+        {
+            for (size_t j = 0; j < SIDE_LENGTH; j++)
+            {
+                costs[i * SIDE_LENGTH + j] = UINT32_MAX;
+            }
+        }
+
+        inputs_part2 = calc_falling_data(1, inputs_part2, &board); // due to how inputs are processed, increment of 1 instead of absolute time
+        print_board(&board);
+        res_part2 = a_star(&board);
+        printf("Longest for time %lu is %u\n", time, res_part2);
+
+        if (res_part2 == UINT32_MAX)
+        {
+            time_part2 = time;
+            break;
+        }
+    }
+
+    printf("time part 2 is : %d\n", time_part2);
+    free(inputs);
     return 0;
 }
