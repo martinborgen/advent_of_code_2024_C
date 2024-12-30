@@ -208,7 +208,10 @@ int main()
     uint32_t res_part1 = a_star(&board);
 
     printf("res part 1 is: %d\n", res_part1);
+
     // Part 2:
+    char last_added_coords[6]; // because how part 2 answer should be give, this needs to keep track of what we added.
+
     uint32_t res_part2 = 0;
     uint32_t time_part2 = 0;
     for (size_t time = TIME_PART1; time < time_max - 1; time++)
@@ -222,6 +225,7 @@ int main()
             }
         }
 
+        strncpy(last_added_coords, inputs_part2, 6);
         inputs_part2 = calc_falling_data(1, inputs_part2, &board); // due to how inputs are processed, increment of 1 instead of absolute time
         print_board(&board);
         res_part2 = a_star(&board);
@@ -235,6 +239,7 @@ int main()
     }
 
     printf("time part 2 is : %d\n", time_part2);
+    printf("The last coords to be added were:\n%s", last_added_coords);
     free(inputs);
     return 0;
 }
