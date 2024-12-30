@@ -12,9 +12,9 @@
 
 // NOTE: Change SIDE_LENGTH when switching between sample and real input!
 
-#define INPUTS_PATH "../inputs/day18_sample.txt"
-#define SIDE_LENGTH 7 // It is 7 for sample, 71 for real
-#define TIME_PART1 12 // It is 12 for sample, 1024 for real
+#define INPUTS_PATH "../inputs/day18.txt"
+#define SIDE_LENGTH 71  // It is 7 for sample, 71 for real
+#define TIME_PART1 1024 // It is 12 for sample, 1024 for real
 
 typedef struct q_node
 {
@@ -126,13 +126,13 @@ void calc_falling_data(size_t time, char *inputs, board_t *board)
     }
 }
 
-void print_arr(size_t rows, size_t cols, char *arr)
+void print_board(board_t *board)
 {
-    for (size_t i = 0; i < rows; i++)
+    for (size_t i = 0; i < board->rows; i++)
     {
-        for (size_t j = 0; j < cols; j++)
+        for (size_t j = 0; j < board->cols; j++)
         {
-            printf("%c", arr[i * rows + j]);
+            printf("%c", board->maze[i * board->rows + j]);
         }
         printf("\n");
     }
@@ -165,17 +165,17 @@ int main()
 
     board.cost[board.start.y * board.rows + board.start.x] = 0;
 
-    print_arr(board.rows, board.cols, board.maze);
+    print_board(&board);
 
     calc_falling_data(TIME_PART1, inputs, &board);
 
-    print_arr(board.rows, board.cols, board.maze);
+    print_board(&board);
 
     q_node *prioq = NULL;
     priq_insert(&prioq, board.start);
     while (prioq != NULL)
     {
-        printf("%ld,%ld\n", prioq->pos.y, prioq->pos.x);
+        // printf("%ld,%ld\n", prioq->pos.y, prioq->pos.x);
         bfs_search(&prioq, &board);
     }
     uint32_t res = board.cost[board.end.y * board.rows + board.end.x];
