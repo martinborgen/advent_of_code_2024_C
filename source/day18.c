@@ -12,9 +12,9 @@
 
 // NOTE: Change SIDE_LENGTH when switching between sample and real input!
 
-#define INPUTS_PATH "../inputs/day18.txt"
-#define SIDE_LENGTH 71  // It is 7 for sample, 71 for real
-#define TIME_PART1 1024 // It is 12 for sample, 1024 for real
+#define INPUTS_PATH "../inputs/day18_sample.txt"
+#define SIDE_LENGTH 7 // It is 7 for sample, 71 for real
+#define TIME_PART1 12 // It is 12 for sample, 1024 for real
 
 typedef struct q_node
 {
@@ -37,6 +37,19 @@ int64_t cost_estinmate(tuple pos)
     return 2 * (SIDE_LENGTH - 1) - pos.x - pos.y; // this ensures cost is admissable, i.e. a lower bound
 }
 
+bool priq_contains(q_node *q, tuple pos)
+{
+    while (q != NULL)
+    {
+        if (tuple_eq(q->pos, pos))
+        {
+            return true;
+        }
+        q = q->next;
+    }
+    return false;
+}
+
 void priq_insert(q_node **q, tuple pos)
 {
     q_node *new_node = malloc(sizeof(q_node));
@@ -45,27 +58,27 @@ void priq_insert(q_node **q, tuple pos)
 
     if (*q == NULL)
     {
+        new_node->next = NULL;
         *q = new_node;
-        return;
     }
-
-    q_node *current = *q;
-    q_node *prev = *q;
-    while (current != NULL && new_node->cost > current->cost)
+    else if (new_node->cost <= (*q)->cost)
     {
-        current = current->next;
-        prev = current;
-    }
-
-    if (prev == *q)
-    {
+        new_node->next = *q;
         *q = new_node;
     }
     else
     {
+        q_node *current = *q;
+        q_node *prev = *q;
+        while (current != NULL && new_node->cost > current->cost)
+        {
+            prev = current;
+            current = current->next;
+        }
+
         prev->next = new_node;
+        new_node->next = current;
     }
-    new_node->next = current;
 }
 
 tuple priq_pop(q_node **q)
@@ -77,14 +90,8 @@ tuple priq_pop(q_node **q)
     return ret;
 }
 
-void bfs_search(q_node **prioq, board_t *board)
+void get_neighbours(tuple here, q_node **prioq, board_t *board)
 {
-    tuple here = priq_pop(prioq);
-    // if we're at the end
-    if (tuple_eq(here, board->end))
-    {
-        return;
-    }
 
     tuple look_dirs[] = {{0, 1},
                          {1, 0},
@@ -105,7 +112,10 @@ void bfs_search(q_node **prioq, board_t *board)
         if (cost_from_here <= look_cost)
         {
             board->cost[look_pos.y * board->rows + look_pos.x] = cost_from_here;
-            priq_insert(prioq, look_pos);
+            if (!priq_contains(*prioq, look_pos))
+            {
+                priq_insert(prioq, look_pos);
+            }
         }
     }
 }
@@ -172,8 +182,14 @@ int main()
     priq_insert(&prioq, board.start);
     while (prioq != NULL)
     {
+        tuple here = priq_pop(&prioq);
+        // if we're at the end
+        if (tuple_eq(here, board.end))
+        {
+            break;
+        }
         // printf("%ld,%ld\n", prioq->pos.y, prioq->pos.x);
-        bfs_search(&prioq, &board);
+        get_neighbours(here, &prioq, &board);
     }
     uint32_t res = board.cost[board.end.y * board.rows + board.end.x];
     // print_board_w_visited(&board, visited);
