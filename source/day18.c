@@ -12,9 +12,9 @@
 
 // NOTE: Change SIDE_LENGTH when switching between sample and real input!
 
-#define INPUTS_PATH "../inputs/day18_sample.txt"
-#define SIDE_LENGTH 7 // It is 7 for sample, 71 for real
-#define TIME_PART1 12 // It is 12 for sample, 1024 for real
+#define INPUTS_PATH "../inputs/day18.txt"
+#define SIDE_LENGTH 71  // It is 7 for sample, 71 for real
+#define TIME_PART1 1024 // It is 12 for sample, 1024 for real
 
 typedef struct q_node
 {
@@ -109,7 +109,7 @@ void get_neighbours(tuple here, q_node **prioq, board_t *board)
 
         uint32_t look_cost = board->cost[look_pos.y * board->rows + look_pos.x];
         uint32_t cost_from_here = board->cost[here.y * board->rows + here.x] + 1;
-        if (cost_from_here <= look_cost)
+        if (cost_from_here < look_cost)
         {
             board->cost[look_pos.y * board->rows + look_pos.x] = cost_from_here;
             if (!priq_contains(*prioq, look_pos))
@@ -183,12 +183,6 @@ int main()
     while (prioq != NULL)
     {
         tuple here = priq_pop(&prioq);
-        // if we're at the end
-        if (tuple_eq(here, board.end))
-        {
-            break;
-        }
-        // printf("%ld,%ld\n", prioq->pos.y, prioq->pos.x);
         get_neighbours(here, &prioq, &board);
     }
     uint32_t res = board.cost[board.end.y * board.rows + board.end.x];
