@@ -1,4 +1,11 @@
+/*
+https://adventofcode.com/2024/day/18
 
+Part 1: find after 1024 bytes have fallen down
+
+Part 2: find first byte that cuts off path
+
+ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -120,6 +127,19 @@ void get_neighbours(tuple here, q_node **prioq, board_t *board)
     }
 }
 
+uint32_t a_star(board_t *board)
+{
+    q_node *prioq = NULL;
+    priq_insert(&prioq, board->start);
+    while (prioq != NULL)
+    {
+        tuple here = priq_pop(&prioq);
+        get_neighbours(here, &prioq, board);
+    }
+    uint32_t res = board->cost[board->end.y * board->rows + board->end.x];
+    return res;
+}
+
 // Note: this assumes time from start. It will do all inputs from start to time.
 void calc_falling_data(size_t time, char *inputs, board_t *board)
 {
@@ -177,16 +197,8 @@ int main()
     calc_falling_data(TIME_PART1, inputs, &board);
 
     print_board(&board);
+    uint32_t res = a_star(&board);
 
-    q_node *prioq = NULL;
-    priq_insert(&prioq, board.start);
-    while (prioq != NULL)
-    {
-        tuple here = priq_pop(&prioq);
-        get_neighbours(here, &prioq, &board);
-    }
-    uint32_t res = board.cost[board.end.y * board.rows + board.end.x];
-    // print_board_w_visited(&board, visited);
     printf("res is: %d\n", res);
     return 0;
 }
