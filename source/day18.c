@@ -141,7 +141,8 @@ uint32_t a_star(board_t *board)
 }
 
 // Note: this assumes time from start. It will do all inputs from start to time.
-void calc_falling_data(size_t time, char *inputs, board_t *board)
+// returns a pointer to the still unprocessed inputs
+char *calc_falling_data(size_t time, char *inputs, board_t *board)
 {
     char *token = strtok(inputs, "\n");
     for (size_t i = 0; i < time; i++)
@@ -150,7 +151,13 @@ void calc_falling_data(size_t time, char *inputs, board_t *board)
         sscanf(token, "%lu,%lu", &x, &y);
         board->maze[y * SIDE_LENGTH + x] = '#';
         token = strtok(NULL, "\n");
+        if (token == NULL)
+        {
+            break;
+        }
     }
+    token[strlen(token)] = '\n'; // strtok modifies string once too much
+    return token;
 }
 
 void print_board(board_t *board)
