@@ -20,6 +20,7 @@ typedef struct q_node
 {
     tuple pos;
     struct q_node *next;
+    int64_t cost;
 } q_node;
 
 typedef struct board_struct
@@ -31,44 +32,40 @@ typedef struct board_struct
     tuple end;
 } board_t;
 
-int64_t scorefun(tuple pos)
+int64_t cost_estinmate(tuple pos)
 {
-    return pos.x * pos.x + pos.y * pos.y;
+    return 2 * (SIDE_LENGTH - 1) - pos.x - pos.y; // this ensures cost is admissable, i.e. a lower bound
 }
 
 void priq_insert(q_node **q, tuple pos)
 {
+    q_node *new_node = malloc(sizeof(q_node));
+    new_node->pos = pos;
+    new_node->cost = cost_estinmate(new_node->pos);
+
     if (*q == NULL)
     {
-        (*q) = malloc(sizeof(q_node));
-        (*q)->next = NULL;
-        (*q)->pos = pos;
-        return;
-    }
-
-    int64_t pos_score = scorefun(pos);
-    if (scorefun((*q)->pos) < pos_score)
-    {
-        q_node *tmp = *q;
-        *q = malloc(sizeof(q_node));
-        (*q)->next = tmp;
-        (*q)->pos = pos;
+        *q = new_node;
         return;
     }
 
     q_node *current = *q;
-    int64_t current_score = scorefun(current->pos);
-
-    while (current->next != NULL && current_score > pos_score)
+    q_node *prev = *q;
+    while (current != NULL && new_node->cost > current->cost)
     {
         current = current->next;
-        current_score = scorefun(current->pos);
+        prev = current;
     }
 
-    q_node *tmp_next = current->next;
-    current->next = malloc(sizeof(q_node));
-    current->next->pos = pos;
-    current->next->next = tmp_next;
+    if (prev == *q)
+    {
+        *q = new_node;
+    }
+    else
+    {
+        prev->next = new_node;
+    }
+    new_node->next = current;
 }
 
 tuple priq_pop(q_node **q)
