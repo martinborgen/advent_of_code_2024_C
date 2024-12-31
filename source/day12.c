@@ -312,7 +312,7 @@ int main()
             uint32_t outside_corners = 0;
 
             explore(r, c, rows_n, cols_n, board, visited, &region_area, &inside_corners, &outside_corners);
-            uint32_t sides = outside_corners + inside_corners; // TODO: Change to use actual outside corners instead of 4
+            uint32_t sides = outside_corners + inside_corners;
             price += region_area * sides;
             printf("Region %c, with area %u and sides %u\n", board[r][c], region_area, sides);
         }
